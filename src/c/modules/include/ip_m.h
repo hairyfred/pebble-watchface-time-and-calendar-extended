@@ -6,3 +6,4 @@ void init_ip_layer(GRect);
 void deinit_ip_layer();
 Layer* get_layer_ip();
 void ip_set(const char *ip);
+void isp_set(const char *isp);

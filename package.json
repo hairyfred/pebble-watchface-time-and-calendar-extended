@@ -105,7 +105,11 @@
       "HealthLeftBarType",
       "HealthRightBarType",
       "PhoneIP",
+      "PhoneISP",
+      "PhoneBattery",
       "ShowPhoneIP",
+      "ShowPhoneBattery",
+      "ShowWeatherExtras",
       "dummy"
     ],
     "resources": {

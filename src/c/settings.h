@@ -147,6 +147,8 @@ int settings_get_ShiftFontColor();
 bool is_time_to_shift();
 bool settings_get_HealthSteps();
 bool settings_get_ShowPhoneIP();
+bool settings_get_ShowPhoneBattery();
+bool settings_get_ShowWeatherExtras();
 bool can_update_weather();
 
 #if defined(PBL_HEALTH)

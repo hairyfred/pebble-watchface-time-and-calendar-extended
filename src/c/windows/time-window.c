@@ -8,6 +8,8 @@
 #include "../modules/include/weather_m.h"
 #include "../modules/include/health.h"
 #include "../modules/include/ip_m.h"
+#include "../modules/include/phone_battery_m.h"
+#include "../modules/include/weather_extras_m.h"
 #include "../settings.h"
 
 static Window *s_time_window;
@@ -41,17 +43,27 @@ static void prv_window_load(Window *window) {
   const GRect calendar_bounds = GRect (2, 92, bounds.size.w, 73);
   GRect weather_bounds = GRect (2, 34, bounds.size.w, 58);
 
-  // Phone IP row is anchored to the bottom of the screen, derived from the
-  // window height rather than a per-platform constant. It is only created when
-  // there is vertical room below the calendar, so it appears automatically on
-  // taller screens (e.g. emery / Pebble Time 2) and is simply absent on the
-  // 144x168 platforms where there is no space.
-  const int ip_height = 22;
-  const int ip_margin = 4;
-  const int ip_y = bounds.size.h - ip_height - ip_margin;
+  // Phone battery sits in the free part of the top bar, between the bluetooth
+  // glyphs and the watch battery. Only created when that gap is wide enough
+  // (i.e. on emery / larger screens); the value itself only arrives on Android.
+  const int pb_x = 82;
+  const int watch_battery_x = bounds.size.w - 47;
+  const bool top_has_room = (watch_battery_x - pb_x) >= 40;
+  const GRect phone_battery_bounds = GRect(pb_x, 0, watch_battery_x - pb_x - 2, 20);
+
+  // Bottom band (tall screens only): a weather-extras line above the IP/ISP
+  // block. All of it is derived from the window height, so it appears on emery /
+  // Pebble Time 2 and is absent on the 144x168 platforms with no room below the
+  // calendar. Existing top layout is unchanged.
   const int calendar_bottom = calendar_bounds.origin.y + calendar_bounds.size.h;
-  const bool ip_has_room = ip_y >= calendar_bottom + 2;
-  const GRect ip_bounds = GRect(2, ip_y, bounds.size.w, ip_height);
+  const int we_height = 18;   // weather extras: one line
+  const int ip_height = 40;   // IP + ISP: two lines
+  const int bottom_margin = 2;
+  const int ip_y = bounds.size.h - ip_height - bottom_margin;
+  const int we_y = ip_y - we_height;
+  const bool bottom_has_room = we_y >= calendar_bottom + 2;
+  const GRect weather_extras_bounds = GRect(2, we_y, bounds.size.w - 4, we_height);
+  const GRect ip_bounds = GRect(2, ip_y, bounds.size.w - 4, ip_height);
 
   init_bluetooh_layer(bluetooth_bounds);
   init_battery_layer(battery_bounds);
@@ -60,7 +72,11 @@ static void prv_window_load(Window *window) {
 
   init_calendar_layer(calendar_bounds);
   init_weather_layer(weather_bounds);
-  if (ip_has_room) {
+  if (top_has_room) {
+    init_phone_battery_layer(phone_battery_bounds);
+  }
+  if (bottom_has_room) {
+    init_weather_extras_layer(weather_extras_bounds);
     init_ip_layer(ip_bounds);
   }
   if (settings_get_HealthSteps()) {
@@ -76,6 +92,12 @@ static void prv_window_load(Window *window) {
  // layer_add_child(window_layer, get_layer_time());
   layer_add_child(window_layer, get_layer_calendar());
   layer_add_child(window_layer, get_layer_weather());
+  if (get_layer_phone_battery()) {
+    layer_add_child(window_layer, get_layer_phone_battery());
+  }
+  if (get_layer_weather_extras()) {
+    layer_add_child(window_layer, get_layer_weather_extras());
+  }
   if (get_layer_ip()) {
     layer_add_child(window_layer, get_layer_ip());
   }
@@ -92,6 +114,8 @@ static void prv_window_unload(Window *window) {
   deinit_calendar_layer();
   deinit_weather_layer();
   deinit_ip_layer();
+  deinit_phone_battery_layer();
+  deinit_weather_extras_layer();
 }
 
 void init_time_window() {
@@ -143,5 +167,11 @@ void time_window_force_redraw() {
   layer_mark_dirty(get_layer_weather());
   if (get_layer_ip()) {
     layer_mark_dirty(get_layer_ip());
+  }
+  if (get_layer_phone_battery()) {
+    layer_mark_dirty(get_layer_phone_battery());
+  }
+  if (get_layer_weather_extras()) {
+    layer_mark_dirty(get_layer_weather_extras());
   }
 }

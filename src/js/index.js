@@ -13,10 +13,34 @@ const clayOpts = { autoHandleEvents: false, userData: { version } };
 const clay = new Clay(localizator(clayConfig), customFunctions, clayOpts);
 
 const sendPhoneIP = async () => {
-  const ip = await getPublicIP();
-  if (ip) {
-    sendToPebble({ PhoneIP: ip });
+  const info = await getPublicIP();
+  if (info && info.ip) {
+    const msg = { PhoneIP: info.ip };
+    if (info.isp) {
+      msg.PhoneISP = info.isp;
+    }
+    sendToPebble(msg);
   }
+};
+
+// Phone battery via the Web Battery API. Present on Android; undefined on iOS,
+// where initPhoneBattery() simply returns and nothing is ever sent.
+let batteryManager = null;
+const sendPhoneBattery = () => {
+  if (batteryManager) {
+    sendToPebble({ PhoneBattery: Math.round(batteryManager.level * 100) });
+  }
+};
+const initPhoneBattery = () => {
+  if (!navigator.getBattery) { //eslint-disable-line
+    return;
+  }
+  navigator.getBattery().then((b) => { //eslint-disable-line
+    batteryManager = b;
+    b.addEventListener('levelchange', sendPhoneBattery);
+    b.addEventListener('chargingchange', sendPhoneBattery);
+    sendPhoneBattery();
+  }).catch(() => {});
 };
 
 Pebble.addEventListener('showConfiguration', () => { //eslint-disable-line
@@ -74,12 +98,15 @@ Pebble.addEventListener('webviewclosed', (e) => { //eslint-disable-line
   localStorage.setItem('clay-helper', JSON.stringify(helperSettings));
   sendToPebble(dict);
   sendPhoneIP();
+  sendPhoneBattery();
 });
 
 Pebble.addEventListener('ready', () => { //eslint-disable-line
   console.log('PebbleKit JS ready!');
   sendToPebble({ JSReady: 1 });
   sendPhoneIP();
+  initPhoneBattery();
+  setInterval(sendPhoneBattery, 30 * 60 * 1000);
 });
 
 const getRequestType = (message) => {

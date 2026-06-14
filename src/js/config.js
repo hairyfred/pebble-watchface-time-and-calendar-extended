@@ -44,7 +44,19 @@ export default [
       {
         type: 'toggle',
         messageKey: 'ShowPhoneIP',
-        label: 'Show phone public IP (shown on larger screens, e.g. Pebble Time 2)',
+        label: 'Show phone public IP + ISP (shown on larger screens, e.g. Pebble Time 2)',
+        defaultValue: true,
+      },
+      {
+        type: 'toggle',
+        messageKey: 'ShowPhoneBattery',
+        label: 'Show phone battery (Android only)',
+        defaultValue: true,
+      },
+      {
+        type: 'toggle',
+        messageKey: 'ShowWeatherExtras',
+        label: 'Show extra weather (humidity, wind) on larger screens',
         defaultValue: true,
       },
       {

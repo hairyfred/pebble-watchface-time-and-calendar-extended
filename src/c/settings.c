@@ -57,6 +57,8 @@ typedef struct ClaySettings {
   PEBBLE_HEALTH_METRIC LeftHealthMetric;
   PEBBLE_HEALTH_METRIC RightHealthMetric;
   uint8_t ShowPhoneIP;
+  uint8_t ShowPhoneBattery;
+  uint8_t ShowWeatherExtras;
 } __attribute__((__packed__)) ClaySettings;
 
 static ClaySettings settings;
@@ -88,6 +90,8 @@ static void prv_default_settings() {
   settings.VibratePeriodicType = VP_LONG;
   settings.SundayFirst = 0;
   settings.ShowPhoneIP = 1;
+  settings.ShowPhoneBattery = 1;
+  settings.ShowWeatherExtras = 1;
   settings.CalendarWeeks = CAL_WV_PCN;
   settings.CalendarBoldWeekDay = 1;
   settings.CalendarInvertWeekDay = 0;
@@ -399,6 +403,14 @@ bool settings_get_HealthSteps() {
 
 bool settings_get_ShowPhoneIP() {
   return get_bool(settings.ShowPhoneIP);
+}
+
+bool settings_get_ShowPhoneBattery() {
+  return get_bool(settings.ShowPhoneBattery);
+}
+
+bool settings_get_ShowWeatherExtras() {
+  return get_bool(settings.ShowWeatherExtras);
 }
 
 bool can_update_weather() {
@@ -756,6 +768,16 @@ void populate_settings(DictionaryIterator *iter, void *context) {
   Tuple *show_phone_ip = dict_find(iter, MESSAGE_KEY_ShowPhoneIP);
   if (show_phone_ip) {
     settings.ShowPhoneIP = show_phone_ip->value->uint8;
+  }
+
+  Tuple *show_phone_batt = dict_find(iter, MESSAGE_KEY_ShowPhoneBattery);
+  if (show_phone_batt) {
+    settings.ShowPhoneBattery = show_phone_batt->value->uint8;
+  }
+
+  Tuple *show_weather_extras = dict_find(iter, MESSAGE_KEY_ShowWeatherExtras);
+  if (show_weather_extras) {
+    settings.ShowWeatherExtras = show_weather_extras->value->uint8;
   }
 
 #if defined(PBL_HEALTH)

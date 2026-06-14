@@ -5,6 +5,8 @@
 #include "../windows/include/forecast-window.h"
 #include "../modules/include/bluetooth_m.h"
 #include "../modules/include/ip_m.h"
+#include "../modules/include/phone_battery_m.h"
+#include "../modules/include/weather_extras_m.h"
 
 
 static bool s_js_ready;
@@ -45,9 +47,12 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
 
   
   Tuple *weather_marker = dict_find(iter, MESSAGE_KEY_WeatherMarker);
-  if (weather_marker) 
+  if (weather_marker)
     {
       simple_weather_update(iter, context);
+      if (get_layer_weather_extras()) {
+        layer_mark_dirty(get_layer_weather_extras());
+      }
     }
   
   Tuple *weather_forecast = dict_find(iter, MESSAGE_KEY_WeatherMarkerForecast);
@@ -58,6 +63,16 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *phone_ip = dict_find(iter, MESSAGE_KEY_PhoneIP);
   if (phone_ip) {
     ip_set(phone_ip->value->cstring);
+  }
+
+  Tuple *phone_isp = dict_find(iter, MESSAGE_KEY_PhoneISP);
+  if (phone_isp) {
+    isp_set(phone_isp->value->cstring);
+  }
+
+  Tuple *phone_battery = dict_find(iter, MESSAGE_KEY_PhoneBattery);
+  if (phone_battery) {
+    phone_battery_set(phone_battery->value->int32);
   }
 }
 
