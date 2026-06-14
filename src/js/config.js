@@ -360,7 +360,7 @@ export default [
       {
         type: 'toggle',
         messageKey: 'HealthSteps',
-        label: 'Show health activity instead of current date',
+        label: 'Show heart rate / steps instead of the date',
         defaultValue: false,
       },
       {
@@ -368,6 +368,38 @@ export default [
         messageKey: 'HealthLeftBarType',
         label: 'Left bar item:',
         options: [
+          {
+            label: 'heart rate',
+            value: 'hb_hr',
+          },
+          {
+            label: 'steps',
+            value: 'hb_steps',
+          },
+          {
+            label: 'distance, meters',
+            value: 'hb_dist_m',
+          },
+          {
+            label: 'distance, feets',
+            value: 'hb_dist_f',
+          },
+          {
+            label: 'calories',
+            value: 'hb_cal',
+          },
+        ],
+        defaultValue: 'hb_hr',
+      },
+      {
+        type: 'select',
+        messageKey: 'HealthRightBarType',
+        label: 'Right bar item:',
+        options: [
+          {
+            label: 'heart rate',
+            value: 'hb_hr',
+          },
           {
             label: 'steps',
             value: 'hb_steps',
@@ -386,30 +418,6 @@ export default [
           },
         ],
         defaultValue: 'hb_steps',
-      },
-      {
-        type: 'select',
-        messageKey: 'HealthRightBarType',
-        label: 'Right bar item:',
-        options: [
-          {
-            label: 'steps',
-            value: 'hb_steps',
-          },
-          {
-            label: 'distance, meters',
-            value: 'hb_dist_m',
-          },
-          {
-            label: 'distance, feets',
-            value: 'hb_dist_f',
-          },
-          {
-            label: 'calories',
-            value: 'hb_cal',
-          },
-        ],
-        defaultValue: 'hb_dist_m',
       },
     ],
   },

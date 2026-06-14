@@ -125,8 +125,12 @@ void prv_populate_this_layer(Layer *me, GContext *ctx) {
     return;
   }
 
-  weather.WeatherReady == 1 && (settings_get_WeatherStatus() == WEATHER_OK || \
-  settings_get_WeatherStatus() == WEATHER_LOCATION_ERROR) ? \
+  // Keep showing the last-known weather as long as we have a reading and weather
+  // is not disabled. A transient fetch error (timeout, network blip) flips the
+  // status to an error code, but we no longer blank the weather on that — the
+  // top bar already shows an error glyph. This stops the weather from
+  // "disappearing" whenever a single refresh fails.
+  weather.WeatherReady == 1 && settings_get_WeatherStatus() != WEATHER_DISABLED ? \
     prv_populate_combined_layer (me, ctx) : prv_populate_time_layer(me, ctx, bounds);
 }
 

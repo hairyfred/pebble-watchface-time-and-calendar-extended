@@ -1,8 +1,11 @@
-// Fetches the phone's *public* IP and its ISP. The LAN/local IP is not
-// reachable from PebbleKit JS. Uses its own XHR with a generous timeout (the
-// shared request helper's 2s timeout is too tight for a cold mobile request),
-// and falls back to a second provider so the ISP is filled in even if the
-// primary omits it. City is available but intentionally not used.
+// Fetches the phone's *public* IP and, when reachable, its ISP. The LAN/local
+// IP is not reachable from PebbleKit JS.
+//
+// Some phone networks (DNS-level ad/tracker blockers) reach OpenWeatherMap and
+// ipify but block IP-geolocation hosts like ipwho.is / ipapi.co. So we try the
+// ISP-capable providers first and fall back to ipify for an IP-only result —
+// that way the IP always refreshes even if the ISP can't be resolved. Each
+// branch logs so the phone's JS console reveals exactly what happened.
 
 const fetchJSON = (url, timeoutMs) => new Promise((resolve) => {
   const xhr = new XMLHttpRequest();
@@ -30,23 +33,33 @@ const parse = (text) => {
 };
 
 export default async () => {
-  // Primary: ipwho.is returns IP + ISP in one HTTPS call.
-  const primary = parse(await fetchJSON('https://ipwho.is/', 8000));
-  if (primary && primary.success && primary.ip) {
-    const isp = (primary.connection && primary.connection.isp) || '';
-    if (isp) {
-      return { ip: primary.ip, isp };
-    }
-    // Got the IP but no ISP — enrich from the fallback, keep this IP.
-    const enrich = parse(await fetchJSON('https://ipapi.co/json/', 8000));
-    return { ip: primary.ip, isp: (enrich && enrich.org) || '' };
+  // 1) ipwho.is — IP + ISP in one call.
+  const a = parse(await fetchJSON('https://ipwho.is/', 8000));
+  if (a && a.success && a.ip && a.connection && a.connection.isp) {
+    console.log(`phone ip via ipwho.is: ${a.ip} / ${a.connection.isp}`);
+    return { ip: a.ip, isp: a.connection.isp };
   }
 
-  // Fallback provider: ipapi.co (its "org" field is the ISP).
-  const fallback = parse(await fetchJSON('https://ipapi.co/json/', 8000));
-  if (fallback && fallback.ip) {
-    return { ip: fallback.ip, isp: fallback.org || '' };
+  // 2) ipapi.co — IP + org (its ISP field).
+  const b = parse(await fetchJSON('https://ipapi.co/json/', 8000));
+  if (b && b.ip) {
+    console.log(`phone ip via ipapi.co: ${b.ip} / ${b.org || '(no isp)'}`);
+    return { ip: b.ip, isp: b.org || '' };
   }
 
+  // 3) ipify — IP only, but the most widely reachable. Better than nothing.
+  const c = parse(await fetchJSON('https://api.ipify.org?format=json', 8000));
+  if (c && c.ip) {
+    console.log(`phone ip via ipify (no isp): ${c.ip}`);
+    return { ip: c.ip, isp: '' };
+  }
+
+  // 4) ipwho.is gave an IP but no ISP earlier — still use the IP.
+  if (a && a.success && a.ip) {
+    console.log(`phone ip via ipwho.is (no isp): ${a.ip}`);
+    return { ip: a.ip, isp: '' };
+  }
+
+  console.log('phone ip: all providers failed');
   return null;
 };

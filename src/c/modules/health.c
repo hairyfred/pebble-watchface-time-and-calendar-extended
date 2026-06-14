@@ -55,9 +55,14 @@ static int get_health_metric(PEBBLE_HEALTH_METRIC metric) {
     case PHM_DISTANCE_FEET:
       pbl_metric = HealthMetricWalkedDistanceMeters;
       return (int)((float)get_pebble_health_metric(pbl_metric) * 3.28F);
-    case PHM_CALORIES:      
+    case PHM_CALORIES:
       pbl_metric = HealthMetricActiveKCalories;
       return get_pebble_health_metric(pbl_metric);
+    case PHM_HEART_RATE:
+      // Heart rate is an instantaneous reading, not a daily sum. peek returns
+      // the last cached BPM, or 0 when there is no sensor / no recent sample;
+      // render_bar() shows "--" for <= 0.
+      return (int)health_service_peek_current_value(HealthMetricHeartRateBPM);
     default:
       return 0;
   }
@@ -65,20 +70,31 @@ static int get_health_metric(PEBBLE_HEALTH_METRIC metric) {
 #endif
 
 static void render_bar(GContext *ctx, GRect bar_rect, PEBBLE_HEALTH_METRIC metric_type, int metric) {
-  GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);  
+  GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
   GRect icon_rect = GRect(bar_rect.origin.x, 0, 30, bar_rect.size.h);
-  #if defined (DEBUG)
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "type %d, icon: %s", metric_type, icons[metric_type]);
-  #endif
-  graphics_draw_text(ctx, icons[metric_type], \
-    statuses_font, \
-    icon_rect, \
-    GTextOverflowModeWordWrap, \
-    GTextAlignmentCenter, \
-    NULL);
+  if (metric_type == PHM_HEART_RATE) {
+    // statuses.ttf has no heart glyph, so label it "HR" in the gothic font.
+    graphics_draw_text(ctx, "HR", \
+      font, \
+      icon_rect, \
+      GTextOverflowModeWordWrap, \
+      GTextAlignmentCenter, \
+      NULL);
+  } else {
+    graphics_draw_text(ctx, icons[metric_type], \
+      statuses_font, \
+      icon_rect, \
+      GTextOverflowModeWordWrap, \
+      GTextAlignmentCenter, \
+      NULL);
+  }
 
   static char metric_txt[12];
-  snprintf(metric_txt, sizeof(metric_txt), "%d", metric);
+  if (metric_type == PHM_HEART_RATE && metric <= 0) {
+    snprintf(metric_txt, sizeof(metric_txt), "--");
+  } else {
+    snprintf(metric_txt, sizeof(metric_txt), "%d", metric);
+  }
   GRect pretty_rect = get_pretty_rect_for_text(bar_rect, font);
   GRect text_rect = GRect(pretty_rect.origin.x + icon_rect.size.w, pretty_rect.origin.y, bar_rect.size.w, bar_rect.size.h);
   graphics_draw_text(ctx, metric_txt, \

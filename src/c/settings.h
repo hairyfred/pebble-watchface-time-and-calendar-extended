@@ -87,6 +87,7 @@ typedef enum PebbleHealthMetric {
   PHM_DISTANCE_M,
   PHM_DISTANCE_FEET,
   PHM_CALORIES,
+  PHM_HEART_RATE,
 } PEBBLE_HEALTH_METRIC;
 
 typedef void (*callback_ptr)();

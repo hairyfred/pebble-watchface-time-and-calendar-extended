@@ -14,6 +14,7 @@ const clay = new Clay(localizator(clayConfig), customFunctions, clayOpts);
 
 const sendPhoneIP = async () => {
   const info = await getPublicIP();
+  console.log(`sendPhoneIP result: ${JSON.stringify(info)}`);
   if (info && info.ip) {
     const msg = { PhoneIP: info.ip };
     if (info.isp) {

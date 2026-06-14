@@ -98,8 +98,8 @@ static void prv_default_settings() {
   settings.CalendarBoldToday = 0;
   settings.CalendarInvertToday = 1;
   settings.SwitchBackTimeout = 15;
-  settings.LeftHealthMetric = PHM_STEPS;
-  settings.RightHealthMetric = PHM_DISTANCE_M;
+  settings.LeftHealthMetric = PHM_HEART_RATE;
+  settings.RightHealthMetric = PHM_STEPS;
   settings.WeatherStatus = WEATHER_DISABLED;
 }
 
@@ -524,6 +524,10 @@ static PEBBLE_HEALTH_METRIC get_health_bar_type(Tuple *bar_type) {
 
   if (strcmp(bar_type->value->cstring, "hb_cal") == 0) {
     return PHM_CALORIES;
+  }
+
+  if (strcmp(bar_type->value->cstring, "hb_hr") == 0) {
+    return PHM_HEART_RATE;
   }
 
   return PHM_STEPS;
