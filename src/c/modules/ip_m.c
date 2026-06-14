@@ -62,17 +62,16 @@ static void prv_populate_ip_layer(Layer *me, GContext *ctx) {
     return;
   }
   GRect b = layer_get_bounds(me);
-  GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
-  int line_h = b.size.h / 2;
 
+  // IP is the headline (GOTHIC_18); ISP is secondary, lighter (GOTHIC_14).
   if (strlen(s_data.ip) > 0) {
-    graphics_draw_text(ctx, s_data.ip, font, \
-        GRect(0, -3, b.size.w, line_h + 6), \
+    graphics_draw_text(ctx, s_data.ip, fonts_get_system_font(FONT_KEY_GOTHIC_18), \
+        GRect(0, -3, b.size.w, 22), \
         GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
   }
   if (strlen(s_data.isp) > 0) {
-    graphics_draw_text(ctx, s_data.isp, font, \
-        GRect(0, line_h - 3, b.size.w, line_h + 6), \
+    graphics_draw_text(ctx, s_data.isp, fonts_get_system_font(FONT_KEY_GOTHIC_14), \
+        GRect(0, 19, b.size.w, 18), \
         GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
   }
 }

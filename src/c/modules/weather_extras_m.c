@@ -34,17 +34,22 @@ static void prv_populate_weather_extras_layer(Layer *me, GContext *ctx) {
     return;
   }
   GRect b = layer_get_bounds(me);
-  GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
+  GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_14);
 
-  static char humidity_txt[12];
-  static char wind_txt[16];
-  snprintf(humidity_txt, sizeof(humidity_txt), "H:%d%%", get_WeatherHumidity());
-  snprintf(wind_txt, sizeof(wind_txt), "W:%d%s", get_WeatherWindSpeed(), get_WeatherWindDirection());
+  // Uppercase the wind direction ("nw" -> "NW") for a tidier look.
+  char dir[6];
+  const char *src = get_WeatherWindDirection();
+  int i = 0;
+  for (; src[i] != '\0' && i < (int)sizeof(dir) - 1; i++) {
+    dir[i] = (src[i] >= 'a' && src[i] <= 'z') ? src[i] - 32 : src[i];
+  }
+  dir[i] = '\0';
 
-  graphics_draw_text(ctx, humidity_txt, font, \
-      GRect(2, -3, b.size.w / 2 - 2, b.size.h), \
-      GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
-  graphics_draw_text(ctx, wind_txt, font, \
-      GRect(b.size.w / 2, -3, b.size.w / 2 - 4, b.size.h), \
-      GTextOverflowModeTrailingEllipsis, GTextAlignmentRight, NULL);
+  static char extras_txt[28];
+  snprintf(extras_txt, sizeof(extras_txt), "Hum %d%%   Wind %d %s", \
+      get_WeatherHumidity(), get_WeatherWindSpeed(), dir);
+
+  graphics_draw_text(ctx, extras_txt, font, \
+      GRect(0, -2, b.size.w, b.size.h), \
+      GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 }
