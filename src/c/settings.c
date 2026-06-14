@@ -56,6 +56,7 @@ typedef struct ClaySettings {
   uint8_t HealthSteps;
   PEBBLE_HEALTH_METRIC LeftHealthMetric;
   PEBBLE_HEALTH_METRIC RightHealthMetric;
+  uint8_t ShowPhoneIP;
 } __attribute__((__packed__)) ClaySettings;
 
 static ClaySettings settings;
@@ -86,6 +87,7 @@ static void prv_default_settings() {
   settings.VibratePeriodicPeroid = P_1H;
   settings.VibratePeriodicType = VP_LONG;
   settings.SundayFirst = 0;
+  settings.ShowPhoneIP = 1;
   settings.CalendarWeeks = CAL_WV_PCN;
   settings.CalendarBoldWeekDay = 1;
   settings.CalendarInvertWeekDay = 0;
@@ -393,6 +395,10 @@ void helper_str_filler(char *item, char* filler) {
 
 bool settings_get_HealthSteps() {
   return get_bool(settings.HealthSteps);
+}
+
+bool settings_get_ShowPhoneIP() {
+  return get_bool(settings.ShowPhoneIP);
 }
 
 bool can_update_weather() {
@@ -745,6 +751,11 @@ void populate_settings(DictionaryIterator *iter, void *context) {
   Tuple *health_steps = dict_find(iter, MESSAGE_KEY_HealthSteps);
   if (health_steps) {
     settings.HealthSteps = health_steps->value->uint8;
+  }
+
+  Tuple *show_phone_ip = dict_find(iter, MESSAGE_KEY_ShowPhoneIP);
+  if (show_phone_ip) {
+    settings.ShowPhoneIP = show_phone_ip->value->uint8;
   }
 
 #if defined(PBL_HEALTH)

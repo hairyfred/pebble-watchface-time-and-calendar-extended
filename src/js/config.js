@@ -43,6 +43,12 @@ export default [
       },
       {
         type: 'toggle',
+        messageKey: 'ShowPhoneIP',
+        label: 'Show phone public IP (shown on larger screens, e.g. Pebble Time 2)',
+        defaultValue: true,
+      },
+      {
+        type: 'toggle',
         messageKey: 'ColorTimeShift',
         id: 'ColorTimeShift',
         label: 'Use different colors on specified time',

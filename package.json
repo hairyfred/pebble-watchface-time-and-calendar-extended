@@ -104,6 +104,8 @@
       "HealthSteps",
       "HealthLeftBarType",
       "HealthRightBarType",
+      "PhoneIP",
+      "ShowPhoneIP",
       "dummy"
     ],
     "resources": {

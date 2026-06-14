@@ -6,10 +6,18 @@ import customFunctions from './functions';
 import localizator from './localizator';
 import sendToPebble from './sender';
 import getWeather from './weather';
+import getPublicIP from './lib/ip';
 import { version } from '../../package.json';
 
 const clayOpts = { autoHandleEvents: false, userData: { version } };
 const clay = new Clay(localizator(clayConfig), customFunctions, clayOpts);
+
+const sendPhoneIP = async () => {
+  const ip = await getPublicIP();
+  if (ip) {
+    sendToPebble({ PhoneIP: ip });
+  }
+};
 
 Pebble.addEventListener('showConfiguration', () => { //eslint-disable-line
   Pebble.openURL(clay.generateUrl()); //eslint-disable-line
@@ -65,11 +73,13 @@ Pebble.addEventListener('webviewclosed', (e) => { //eslint-disable-line
 
   localStorage.setItem('clay-helper', JSON.stringify(helperSettings));
   sendToPebble(dict);
+  sendPhoneIP();
 });
 
 Pebble.addEventListener('ready', () => { //eslint-disable-line
   console.log('PebbleKit JS ready!');
   sendToPebble({ JSReady: 1 });
+  sendPhoneIP();
 });
 
 const getRequestType = (message) => {

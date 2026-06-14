@@ -4,6 +4,7 @@
 #include "../windows/include/time-window.h"
 #include "../windows/include/forecast-window.h"
 #include "../modules/include/bluetooth_m.h"
+#include "../modules/include/ip_m.h"
 
 
 static bool s_js_ready;
@@ -52,7 +53,12 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *weather_forecast = dict_find(iter, MESSAGE_KEY_WeatherMarkerForecast);
   if (weather_forecast) {
     forecast_update_disp(iter, context);
-  }    
+  }
+
+  Tuple *phone_ip = dict_find(iter, MESSAGE_KEY_PhoneIP);
+  if (phone_ip) {
+    ip_set(phone_ip->value->cstring);
+  }
 }
 
 

@@ -1,0 +1,78 @@
+name: Build Pebble PBW
+
+# Builds the watchface .pbw (all target platforms, including emery / Pebble Time 2)
+# entirely in the cloud — no local Pebble SDK needed. Download the artifact from the
+# run summary and install it on the watch via the Rebble phone app.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # The Pebble SDK tool is Python 2.7 only, so we build inside a py2.7 container.
+    container:
+      image: python:2.7.18-buster
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Point apt at the Debian archive (buster is EOL)
+        run: |
+          set -e
+          printf 'deb http://archive.debian.org/debian buster main\n' > /etc/apt/sources.list
+          printf 'deb http://archive.debian.org/debian-security buster/updates main\n' >> /etc/apt/sources.list
+          printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99no-check-valid
+
+      - name: Install system dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            wget ca-certificates bzip2 \
+            nodejs npm \
+            libsdl1.2debian libfdt1 libpixman-1-0 libfreetype6 libx11-6 rlwrap
+
+      - name: Build PebbleKit JS (babel src/js -> src/pkjs)
+        run: |
+          npm ci || npm install
+          npm run build
+
+      - name: Download Pebble SDK tool (4.5)
+        run: |
+          mkdir -p sdk
+          # Download to a file (not a pipe) so an HTTP error fails loudly instead of
+          # feeding an error page into tar. Regional path-style S3 endpoint — the bucket
+          # name has dots, which breaks HTTPS virtual-hosting, and the generic endpoint
+          # 301-redirects without a Location header.
+          wget -O pebble-sdk-tool.tar.bz2 \
+            https://s3-us-west-2.amazonaws.com/assets.getpebble.com/pebble-tool/pebble-sdk-4.5-linux64.tar.bz2
+          tar xjf pebble-sdk-tool.tar.bz2 --strip-components=1 -C sdk
+          test -x sdk/bin/pebble
+
+      - name: Set up SDK python environment
+        run: |
+          pip install virtualenv
+          cd sdk
+          virtualenv .env
+          bash -c "source .env/bin/activate && pip install -r requirements.txt && deactivate"
+
+      - name: Install SDK core 4.3 (includes the emery platform)
+        run: |
+          mkdir -p ~/.pebble-sdk
+          touch ~/.pebble-sdk/NO_TRACKING
+          wget -O sdk/sdk-core-4.3.tar.bz2 \
+            https://raw.githubusercontent.com/aveao/PebbleArchive/master/SDKCores/sdk-core-4.3.tar.bz2
+          yes | sdk/bin/pebble sdk install sdk/sdk-core-4.3.tar.bz2
+
+      - name: Build (release)
+        run: yes | sdk/bin/pebble build
+
+      - name: Upload PBW
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-and-calendar-pbw
+          path: build/*.pbw
+          if-no-files-found: error

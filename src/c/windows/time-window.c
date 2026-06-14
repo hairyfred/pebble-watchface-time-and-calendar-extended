@@ -7,6 +7,7 @@
 //#include "../modules/include/time_m.h"
 #include "../modules/include/weather_m.h"
 #include "../modules/include/health.h"
+#include "../modules/include/ip_m.h"
 #include "../settings.h"
 
 static Window *s_time_window;
@@ -40,13 +41,28 @@ static void prv_window_load(Window *window) {
   const GRect calendar_bounds = GRect (2, 92, bounds.size.w, 73);
   GRect weather_bounds = GRect (2, 34, bounds.size.w, 58);
 
+  // Phone IP row is anchored to the bottom of the screen, derived from the
+  // window height rather than a per-platform constant. It is only created when
+  // there is vertical room below the calendar, so it appears automatically on
+  // taller screens (e.g. emery / Pebble Time 2) and is simply absent on the
+  // 144x168 platforms where there is no space.
+  const int ip_height = 22;
+  const int ip_margin = 4;
+  const int ip_y = bounds.size.h - ip_height - ip_margin;
+  const int calendar_bottom = calendar_bounds.origin.y + calendar_bounds.size.h;
+  const bool ip_has_room = ip_y >= calendar_bottom + 2;
+  const GRect ip_bounds = GRect(2, ip_y, bounds.size.w, ip_height);
+
   init_bluetooh_layer(bluetooth_bounds);
   init_battery_layer(battery_bounds);
-  
+
  // init_time_layer(time_bounds);
 
   init_calendar_layer(calendar_bounds);
   init_weather_layer(weather_bounds);
+  if (ip_has_room) {
+    init_ip_layer(ip_bounds);
+  }
   if (settings_get_HealthSteps()) {
     init_health_layer(date_bounds);
     layer_add_child(window_layer, get_layer_health());
@@ -60,6 +76,9 @@ static void prv_window_load(Window *window) {
  // layer_add_child(window_layer, get_layer_time());
   layer_add_child(window_layer, get_layer_calendar());
   layer_add_child(window_layer, get_layer_weather());
+  if (get_layer_ip()) {
+    layer_add_child(window_layer, get_layer_ip());
+  }
 }
 
 static void prv_window_unload(Window *window) {
@@ -72,6 +91,7 @@ static void prv_window_unload(Window *window) {
   }  
   deinit_calendar_layer();
   deinit_weather_layer();
+  deinit_ip_layer();
 }
 
 void init_time_window() {
@@ -121,4 +141,7 @@ void time_window_force_redraw() {
   }
   layer_mark_dirty(get_layer_calendar());
   layer_mark_dirty(get_layer_weather());
+  if (get_layer_ip()) {
+    layer_mark_dirty(get_layer_ip());
+  }
 }
