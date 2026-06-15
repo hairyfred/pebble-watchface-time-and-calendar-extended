@@ -136,6 +136,11 @@
           "file": "fonts/Climacons-Font_mod.ttf"
         },
         {
+          "type": "font",
+          "name": "CLIMACONS_20",
+          "file": "fonts/Climacons-Font_mod.ttf"
+        },
+        {
           "characterRegex": "[:0-9]",
           "type": "font",
           "name": "TIME_BOLD_58",

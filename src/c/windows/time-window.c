@@ -7,7 +7,7 @@
 //#include "../modules/include/time_m.h"
 #include "../modules/include/weather_m.h"
 #include "../modules/include/health.h"
-#include "../modules/include/ip_m.h"
+#include "../modules/include/weather_timeline_m.h"
 #include "../modules/include/phone_battery_m.h"
 #include "../modules/include/weather_extras_m.h"
 #include "../modules/include/health_strip_m.h"
@@ -52,19 +52,19 @@ static void prv_window_load(Window *window) {
   const bool top_has_room = (watch_battery_x - pb_x) >= 40;
   const GRect phone_battery_bounds = GRect(pb_x, 0, watch_battery_x - pb_x - 2, 20);
 
-  // Bottom band (tall screens only): a weather-extras line above the IP/ISP
-  // block. All of it is derived from the window height, so it appears on emery /
+  // Bottom band (tall screens only): a compact weather-extras line above a
+  // forecast timeline. Derived from the window height, so it appears on emery /
   // Pebble Time 2 and is absent on the 144x168 platforms with no room below the
   // calendar. Existing top layout is unchanged.
   const int calendar_bottom = calendar_bounds.origin.y + calendar_bounds.size.h;
-  const int we_height = 18;   // weather extras: one line
-  const int ip_height = 40;   // IP + ISP: two lines
-  const int bottom_margin = 2;
-  const int ip_y = bounds.size.h - ip_height - bottom_margin;
-  const int we_y = ip_y - we_height;
-  const bool bottom_has_room = we_y >= calendar_bottom + 2;
+  const int we_height = 14;   // weather extras: one compact line
+  const int tl_height = 46;   // forecast timeline: time + icon + temp
+  const int bottom_margin = 1;
+  const int tl_y = bounds.size.h - tl_height - bottom_margin;
+  const int we_y = calendar_bottom + 1;
+  const bool bottom_has_room = tl_y >= (we_y + we_height);
   const GRect weather_extras_bounds = GRect(2, we_y, bounds.size.w - 4, we_height);
-  const GRect ip_bounds = GRect(2, ip_y, bounds.size.w - 4, ip_height);
+  const GRect timeline_bounds = GRect(2, tl_y, bounds.size.w - 4, tl_height);
 
   init_bluetooh_layer(bluetooth_bounds);
   init_battery_layer(battery_bounds);
@@ -78,7 +78,7 @@ static void prv_window_load(Window *window) {
   }
   if (bottom_has_room) {
     init_weather_extras_layer(weather_extras_bounds);
-    init_ip_layer(ip_bounds);
+    init_weather_timeline_layer(timeline_bounds);
   }
   if (settings_get_HealthSteps()) {
     init_health_layer(date_bounds);
@@ -105,8 +105,8 @@ static void prv_window_load(Window *window) {
   if (get_layer_weather_extras()) {
     layer_add_child(window_layer, get_layer_weather_extras());
   }
-  if (get_layer_ip()) {
-    layer_add_child(window_layer, get_layer_ip());
+  if (get_layer_weather_timeline()) {
+    layer_add_child(window_layer, get_layer_weather_timeline());
   }
 }
 
@@ -120,7 +120,7 @@ static void prv_window_unload(Window *window) {
   }  
   deinit_calendar_layer();
   deinit_weather_layer();
-  deinit_ip_layer();
+  deinit_weather_timeline_layer();
   deinit_phone_battery_layer();
   deinit_weather_extras_layer();
   deinit_health_strip_layer();
@@ -173,8 +173,8 @@ void time_window_force_redraw() {
   }
   layer_mark_dirty(get_layer_calendar());
   layer_mark_dirty(get_layer_weather());
-  if (get_layer_ip()) {
-    layer_mark_dirty(get_layer_ip());
+  if (get_layer_weather_timeline()) {
+    layer_mark_dirty(get_layer_weather_timeline());
   }
   if (get_layer_phone_battery()) {
     layer_mark_dirty(get_layer_phone_battery());

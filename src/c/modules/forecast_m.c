@@ -69,6 +69,30 @@ Layer* get_layer_forecast() {
 	return s_forecast_layer;
 }
 
+void forecast_load() {
+  prv_load_forecast();
+}
+
+uint8_t get_forecast_ready() {
+  return forecast.ForecastReady;
+}
+
+uint8_t get_forecast_qty() {
+  return forecast.ForecastQty > 5 ? 5 : forecast.ForecastQty;
+}
+
+char* get_forecast_timestamp(int i) {
+  return forecast.ForecastTimeStamp[i];
+}
+
+char* get_forecast_condition(int i) {
+  return forecast.ForecastCondition[i];
+}
+
+int get_forecast_temperature(int i) {
+  return forecast.ForecastTemperature[i];
+}
+
 static void prv_populate_forecast_layer(Layer *me, GContext *ctx) {	
   if (forecast.ForecastReady != 1 || forecast.ForecastQty == 0) {
     #if defined (DEBUG)
@@ -181,12 +205,14 @@ void update_forecast(bool force) {
     prv_send_forecast_update_request();
     return;
   }
-  
-  if (settings_get_PebbleShakeAction() != PSA_FORECAST) {
+
+  // Refresh the forecast whenever it is enabled (the inline bottom timeline uses
+  // it), not just when the shake action is "show forecast".
+  if (!settings_get_ForecastEnabled()) {
     #if defined (DEBUG)
-      APP_LOG(APP_LOG_LEVEL_DEBUG, "Shake action is not about show forecast, skipping");
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "Forecast disabled, skipping");
     #endif
-    return;    
+    return;
   }
 
   if (!can_update_weather()) {

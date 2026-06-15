@@ -9,10 +9,10 @@ static GPath *s_bolt_path;
 static void prv_battery_handler(BatteryChargeState);
 static void prv_populate_battery_layer(Layer *, GContext *);
 
-// Small lightning bolt shown in place of the level bar while charging.
+// Small lightning bolt shown next to the battery icon while charging.
 static const GPathInfo BOLT_PATH_INFO = {
   .num_points = 6,
-  .points = (GPoint []) {{6, 0}, {0, 9}, {4, 9}, {2, 16}, {9, 6}, {5, 6}}
+  .points = (GPoint []) {{4, 0}, {0, 8}, {3, 8}, {2, 14}, {7, 5}, {4, 5}}
 };
 
 void init_battery_layer(GRect rect) {
@@ -51,7 +51,9 @@ static void prv_populate_battery_layer(Layer *me, GContext *ctx) {
   static char percent_text[5];
 
   GRect bb = layer_get_bounds(me);
-  GRect percent_text_rect = GRect (0, 0, 34, bb.size.h);
+  bool is_charging_now = s_battery_level.is_charging || s_battery_level.is_plugged;
+  // When charging, reserve the far-left for the bolt so it doesn't overlap the %.
+  GRect percent_text_rect = GRect (is_charging_now ? 9 : 0, 0, is_charging_now ? 25 : 34, bb.size.h);
   GRect battery_bar_rect = GRect (34, -2, 24, bb.size.h);
 
   int battery_bar_index = s_battery_level.charge_percent == 0 ? 0 : s_battery_level.charge_percent / 10;
@@ -62,20 +64,20 @@ static void prv_populate_battery_layer(Layer *me, GContext *ctx) {
     GTextOverflowModeWordWrap, \
     GTextAlignmentRight, NULL);
 
+  // Keep the original battery level-bar icon...
+  graphics_draw_text(ctx, battery_bar[battery_bar_index], \
+    statuses_font, \
+    battery_bar_rect, \
+    GTextOverflowModeWordWrap, \
+    GTextAlignmentLeft, NULL);
+
+  // ...and add a small lightning bolt to its left while charging/plugged in.
+  // gpath fills with the context fill color, so set it to the font color first.
   if (s_battery_level.is_charging || s_battery_level.is_plugged) {
-    // Charging: draw a lightning bolt instead of the level bar (the % already
-    // conveys the level). gpath fills with the context fill color, so set it to
-    // the foreground/font color first.
     int fg_hex = is_time_to_shift() ? settings_get_ShiftFontColor() : settings_get_FontColorHex();
     graphics_context_set_fill_color(ctx, GColorFromHEX(fg_hex));
-    gpath_move_to(s_bolt_path, GPoint(battery_bar_rect.origin.x + 2, 2));
+    gpath_move_to(s_bolt_path, GPoint(0, 3));
     gpath_draw_filled(ctx, s_bolt_path);
-  } else {
-    graphics_draw_text(ctx, battery_bar[battery_bar_index], \
-      statuses_font, \
-      battery_bar_rect, \
-      GTextOverflowModeWordWrap, \
-      GTextAlignmentLeft, NULL);
   }
 }
 
