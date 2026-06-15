@@ -3,6 +3,7 @@
 #include "../settings.h"
 #include "include/ticktimerhelper.h"
 #include "../modules/include/weather_m.h"
+#include "../modules/include/health_strip_m.h"
 #include "../3rdparty/locale_framework/localize.h"
 
 static struct tm currentTime = {0};
@@ -13,9 +14,14 @@ struct tm* get_Time() {
   return &currentTime;
 }
 
-static void prv_utils_handler(struct tm* tick_time) {  
+static void prv_utils_handler(struct tm* tick_time) {
   currentTime = *tick_time;
   layer_mark_dirty(get_layer_weather());
+  // Refresh the heart-rate / steps strip on the same tick (it only exists on
+  // wide screens); cheap, and keeps the HR value current.
+  if (get_layer_health_strip()) {
+    layer_mark_dirty(get_layer_health_strip());
+  }
 }
 
 void init_time_utils() {  

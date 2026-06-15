@@ -5,8 +5,15 @@
 static Layer *s_battery_layer;
 static GFont statuses_font;
 static BatteryChargeState s_battery_level;
+static GPath *s_bolt_path;
 static void prv_battery_handler(BatteryChargeState);
 static void prv_populate_battery_layer(Layer *, GContext *);
+
+// Small lightning bolt shown in place of the level bar while charging.
+static const GPathInfo BOLT_PATH_INFO = {
+  .num_points = 6,
+  .points = (GPoint []) {{6, 0}, {0, 9}, {4, 9}, {2, 16}, {9, 6}, {5, 6}}
+};
 
 void init_battery_layer(GRect rect) {
   s_battery_layer = layer_create(rect);
@@ -14,12 +21,14 @@ void init_battery_layer(GRect rect) {
   battery_state_service_subscribe(prv_battery_handler);
   prv_battery_handler(battery_state_service_peek());
   statuses_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_STATUSES_18));
+  s_bolt_path = gpath_create(&BOLT_PATH_INFO);
 }
 
 void deinit_battery_layer() {
     battery_state_service_unsubscribe();
     layer_destroy(s_battery_layer);
     fonts_unload_custom_font(statuses_font);
+    gpath_destroy(s_bolt_path);
 }
 
 static void prv_battery_handler(BatteryChargeState state) {
@@ -52,11 +61,22 @@ static void prv_populate_battery_layer(Layer *me, GContext *ctx) {
     percent_text_rect, \
     GTextOverflowModeWordWrap, \
     GTextAlignmentRight, NULL);
-  graphics_draw_text(ctx, battery_bar[battery_bar_index], \
-    statuses_font, \
-    battery_bar_rect, \
-    GTextOverflowModeWordWrap, \
-    GTextAlignmentLeft, NULL);  
+
+  if (s_battery_level.is_charging || s_battery_level.is_plugged) {
+    // Charging: draw a lightning bolt instead of the level bar (the % already
+    // conveys the level). gpath fills with the context fill color, so set it to
+    // the foreground/font color first.
+    int fg_hex = is_time_to_shift() ? settings_get_ShiftFontColor() : settings_get_FontColorHex();
+    graphics_context_set_fill_color(ctx, GColorFromHEX(fg_hex));
+    gpath_move_to(s_bolt_path, GPoint(battery_bar_rect.origin.x + 2, 2));
+    gpath_draw_filled(ctx, s_bolt_path);
+  } else {
+    graphics_draw_text(ctx, battery_bar[battery_bar_index], \
+      statuses_font, \
+      battery_bar_rect, \
+      GTextOverflowModeWordWrap, \
+      GTextAlignmentLeft, NULL);
+  }
 }
 
 Layer* get_layer_battery() {

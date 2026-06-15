@@ -10,6 +10,7 @@
 #include "../modules/include/ip_m.h"
 #include "../modules/include/phone_battery_m.h"
 #include "../modules/include/weather_extras_m.h"
+#include "../modules/include/health_strip_m.h"
 #include "../settings.h"
 
 static Window *s_time_window;
@@ -85,6 +86,12 @@ static void prv_window_load(Window *window) {
   } else {
     init_date_layer(date_bounds);
     layer_add_child(window_layer, get_layer_date());
+    // On wide screens, flank the centered date with heart rate (left) + steps
+    // (right) using the otherwise-empty horizontal margins.
+    if (top_has_room) {
+      init_health_strip_layer(date_bounds);
+      layer_add_child(window_layer, get_layer_health_strip());
+    }
   }
   layer_add_child(window_layer, get_layer_bluetooth());
   layer_add_child(window_layer, get_layer_battery());
@@ -116,6 +123,7 @@ static void prv_window_unload(Window *window) {
   deinit_ip_layer();
   deinit_phone_battery_layer();
   deinit_weather_extras_layer();
+  deinit_health_strip_layer();
 }
 
 void init_time_window() {
@@ -173,5 +181,8 @@ void time_window_force_redraw() {
   }
   if (get_layer_weather_extras()) {
     layer_mark_dirty(get_layer_weather_extras());
+  }
+  if (get_layer_health_strip()) {
+    layer_mark_dirty(get_layer_health_strip());
   }
 }
