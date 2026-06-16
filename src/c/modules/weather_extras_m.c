@@ -45,11 +45,23 @@ static void prv_populate_weather_extras_layer(Layer *me, GContext *ctx) {
   }
   dir[i] = '\0';
 
-  static char extras_txt[28];
-  snprintf(extras_txt, sizeof(extras_txt), "Hum %d%%   Wind %d %s", \
-      get_WeatherHumidity(), get_WeatherWindSpeed(), dir);
+  // Three segments across the line: humidity (left), wind (centre), sunset
+  // (right). "Set HH:MM" is the sunset time from the weather data.
+  static char hum_txt[14];
+  static char wind_txt[16];
+  static char set_txt[16];
+  snprintf(hum_txt, sizeof(hum_txt), "Hum %d%%", get_WeatherHumidity());
+  snprintf(wind_txt, sizeof(wind_txt), "Wind %d %s", get_WeatherWindSpeed(), dir);
+  snprintf(set_txt, sizeof(set_txt), "Set %s", get_WeatherSunset());
 
-  graphics_draw_text(ctx, extras_txt, font, \
-      GRect(0, -2, b.size.w, b.size.h), \
+  const int third = b.size.w / 3;
+  graphics_draw_text(ctx, hum_txt, font, \
+      GRect(2, -2, third - 2, b.size.h + 4), \
+      GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, wind_txt, font, \
+      GRect(third, -2, third, b.size.h + 4), \
       GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, set_txt, font, \
+      GRect(2 * third, -2, b.size.w - 2 * third - 2, b.size.h + 4), \
+      GTextOverflowModeTrailingEllipsis, GTextAlignmentRight, NULL);
 }

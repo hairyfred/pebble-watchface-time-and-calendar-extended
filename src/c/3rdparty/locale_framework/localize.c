@@ -57,7 +57,9 @@ void locale_init(void) {
 char *locale_str(int hashval) {
   Tuple *tupl = dict_find(&s_locale_dict, hashval);
 
-  if (tupl && tupl->value && tupl->value->cstring[0] != '\0') {
+  // tupl->value is a flexible-array member (address is never NULL), so a NULL
+  // check on it errors under newer GCC (-Werror=address); just check the tuple.
+  if (tupl && tupl->value->cstring[0] != '\0') {
     return tupl->value->cstring;
   }
   return "\7"; //return blank character
