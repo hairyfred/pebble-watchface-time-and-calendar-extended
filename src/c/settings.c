@@ -59,6 +59,7 @@ typedef struct ClaySettings {
   uint8_t ShowPhoneIP;
   uint8_t ShowPhoneBattery;
   uint8_t ShowWeatherExtras;
+  uint8_t AlwaysShowSeconds;
 } __attribute__((__packed__)) ClaySettings;
 
 static ClaySettings settings;
@@ -92,6 +93,7 @@ static void prv_default_settings() {
   settings.ShowPhoneIP = 1;
   settings.ShowPhoneBattery = 1;
   settings.ShowWeatherExtras = 1;
+  settings.AlwaysShowSeconds = 0;
   settings.CalendarWeeks = CAL_WV_PCN;
   settings.CalendarBoldWeekDay = 1;
   settings.CalendarInvertWeekDay = 0;
@@ -337,7 +339,10 @@ WEATHER_STATUS settings_get_WeatherStatus() {
 }
 
 CLOCK_SECONDS settings_get_ClockShowSeconds() {
-  return seconds_settings;
+  // The "always show seconds" toggle forces the seconds view (and the
+  // per-second tick) on permanently; otherwise fall back to the shake-driven
+  // temporary-seconds state.
+  return settings.AlwaysShowSeconds ? SEC_SHOWING : seconds_settings;
 }
 
 PEBBLE_SHAKE_ACTION settings_get_PebbleShakeAction() {
@@ -785,6 +790,11 @@ void populate_settings(DictionaryIterator *iter, void *context) {
   Tuple *show_weather_extras = dict_find(iter, MESSAGE_KEY_ShowWeatherExtras);
   if (show_weather_extras) {
     settings.ShowWeatherExtras = show_weather_extras->value->uint8;
+  }
+
+  Tuple *always_seconds = dict_find(iter, MESSAGE_KEY_AlwaysShowSeconds);
+  if (always_seconds) {
+    settings.AlwaysShowSeconds = always_seconds->value->uint8;
   }
 
 #if defined(PBL_HEALTH)

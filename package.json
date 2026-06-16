@@ -114,6 +114,7 @@
       "ShowPhoneIP",
       "ShowPhoneBattery",
       "ShowWeatherExtras",
+      "AlwaysShowSeconds",
       "dummy"
     ],
     "resources": {

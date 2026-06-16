@@ -72,11 +72,11 @@ const getForecastItems = (forecastType) => {
     case 'ft_off':
       return [];
     case 'ft_3h':
-      return [0, 1, 2, 3];
+      return [0, 1, 2, 3, 4];
     case 'ft_6h':
-      return [0, 2, 4, 6];
+      return [0, 2, 4, 6, 8];
     default:
-      return [0, 1, 2, 3];
+      return [0, 1, 2, 3, 4];
   }
 };
 

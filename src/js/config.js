@@ -182,6 +182,12 @@ export default [
         defaultValue: 'bebas',
       },
       {
+        type: 'toggle',
+        messageKey: 'AlwaysShowSeconds',
+        label: 'Always show seconds (reduces battery life)',
+        defaultValue: false,
+      },
+      {
         type: 'select',
         group: 'seconds',
         messageKey: 'SwitchBackTimeoutSeconds',
