@@ -1,5 +1,23 @@
 # Time-and-Calendar watchface
+
+# My personal changes
+
+WARNING: My changes are AI slop coded, I have tested them but I can not guarantee stability or security.
+
+Features Added:
+- Scaled for PT2 devices
+- Weather timeline below calendar (optional wrist flick to go between the current day and overview of next 5 days)
+- Wind/Humidity %
+- Enable seconds (not just on wrist flick)
+- Heartrate and Steps
+- Phone Battery
+- Charging icon
+- Current public IP (Still a work in progress where to display it)
+
+All credit goes to the original developer, I used the watch face on my pebble steel for most of its life, so I just added the new capabilities to it :)
+
 [Читать на русском](https://github.com/UnnamedHero/pebble-watchface-time-and-calendar/blob/master/README_RU.md)
+
 
 Welcome to a "Time-and-Calendar" watchface for Pebble smartwatch. Watch was was created as a trubute to such watchfaces as TCW (https://github.com/alexsum/TCW) and Timely (https://github.com/cynorg/PebbleTimely). 
 
