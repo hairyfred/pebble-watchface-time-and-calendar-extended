@@ -46,24 +46,41 @@ const makeWeather = (weather) => {
   };
 };
 
-const makeForecast = (forecast) => {
-  const { sunrise = new Date(), sunset = new Date() } = getSunTimes();
-  const forecastData = forecast.reduce((acc, item, index) => {
+const makeForecast = (data) => {
+  const { sunrise = new Date(), sunset = new Date() } = getSunTimes() || {};
+  const hourly = data.hourly || [];
+  const daily = data.daily || [];
+
+  // Hourly: show just the time (HH:mm) above each icon, not the date.
+  const hourlyData = hourly.reduce((acc, item, index) => {
     const timeStamp = item.timeStamp * 1000;
     const conditionSymbol = getConditionSymbol(item.condition, sunrise, sunset, timeStamp);
-    const forecastItem = {
+    return {
+      ...acc,
       [messageKeys.ForecastTemperature + index]: item.temperature,
-      [messageKeys.ForecastTimeStamp + index]: formatTime(timeStamp, 'DD.MM HH:mm'),
+      [messageKeys.ForecastTimeStamp + index]: formatTime(timeStamp, 'HH:mm'),
       [messageKeys.ForecastCondition + index]: conditionSymbol,
     };
-    return { ...acc, ...forecastItem };
   }, {});
-  // console.log(`fore stamp ${forecast[0].timeStamp}`);
+
+  // Daily: a short day label (Mon, Tue...) above each icon.
+  const dailyData = daily.reduce((acc, day, index) => {
+    const conditionSymbol = getConditionSymbol(day.condition, sunrise, sunset, day.midTimeStamp);
+    return {
+      ...acc,
+      [messageKeys.DailyForecastTemperature + index]: day.temperature,
+      [messageKeys.DailyForecastDayLabel + index]: day.dayLabel,
+      [messageKeys.DailyForecastCondition + index]: conditionSymbol,
+    };
+  }, {});
+
   return {
     WeatherMarkerForecast: true,
-    ForecastQty: forecast.length,
-    ForecastTime: forecast[0].timeStamp,
-    ...forecastData,
+    ForecastQty: hourly.length,
+    ForecastTime: hourly.length ? hourly[0].timeStamp : 0,
+    DailyForecastQty: daily.length,
+    ...hourlyData,
+    ...dailyData,
     WeatherError: messages.weather_ok,
   };
 };

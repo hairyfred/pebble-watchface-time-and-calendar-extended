@@ -8,6 +8,7 @@
 #include "../modules/include/phone_battery_m.h"
 #include "../modules/include/weather_extras_m.h"
 #include "../modules/include/weather_timeline_m.h"
+#include "../modules/include/dailyforecast_m.h"
 
 
 static bool s_js_ready;
@@ -59,6 +60,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *weather_forecast = dict_find(iter, MESSAGE_KEY_WeatherMarkerForecast);
   if (weather_forecast) {
     forecast_update_disp(iter, context);
+    dailyforecast_update(iter, context);
     if (get_layer_weather_timeline()) {
       layer_mark_dirty(get_layer_weather_timeline());
     }

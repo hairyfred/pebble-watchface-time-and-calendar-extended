@@ -159,6 +159,10 @@ void ready_for_weather(bool force) {
   update_weather(force);
 }
 
+void time_window_swap_weather() {
+  weather_timeline_toggle_mode();
+}
+
 void simple_weather_update(DictionaryIterator *iter, void *context) {
   get_weather(iter, context);
 }

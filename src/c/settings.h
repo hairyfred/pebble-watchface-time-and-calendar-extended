@@ -80,6 +80,7 @@ typedef enum PebbleShakeAction {
   PSA_NOTHING,
   PSA_FORECAST,
   PSA_SECONDS,
+  PSA_SWAP_WEATHER,
 } PEBBLE_SHAKE_ACTION;
 
 typedef enum PebbleHealthMetric {

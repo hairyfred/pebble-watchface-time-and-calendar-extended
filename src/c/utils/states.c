@@ -20,7 +20,7 @@ static void prv_timer_second_shake_timeout(void*);
 
 static state *current_state;
 static state clock_and_weather, clock_and_weather_forecast, no_forecast, \
-              seconds_clock, seconds_clock_showing;
+              seconds_clock, seconds_clock_showing, swap_weather;
 
 static void prv_init_timer(uint8_t timeout);
 static void prv_set_init_state();
@@ -111,6 +111,12 @@ static void seconds_clock_showing_handler() {
   prv_set_init_state();
   reload_timer();
 }
+
+static void swap_weather_handler() {
+  // Flick toggles the bottom timeline between hourly and daily. Stays on the
+  // watchface (no window push, no auto-revert).
+  time_window_swap_weather();
+}
   
 static void prv_init_states() {
   clock_and_weather = (state){
@@ -132,6 +138,10 @@ static void prv_init_states() {
   seconds_clock_showing = (state) {
     .handler = seconds_clock_showing_handler
   };
+
+  swap_weather = (state) {
+    .handler = swap_weather_handler
+  };
 }
   
 static void prv_set_init_state() {
@@ -151,6 +161,10 @@ static void prv_set_init_state() {
     case PSA_SECONDS:
         settings_set_ClockShowSeconds_enabled();
         current_state = &seconds_clock;
+        break;
+    case PSA_SWAP_WEATHER:
+        settings_set_ClockShowSeconds_disabled();
+        current_state = &swap_weather;
         break;
   }
 }

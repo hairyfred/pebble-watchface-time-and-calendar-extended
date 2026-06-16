@@ -705,6 +705,9 @@ void populate_settings(DictionaryIterator *iter, void *context) {
       case 2:
         settings.PebbleShakeAction = PSA_SECONDS;
         break;
+      case 3:
+        settings.PebbleShakeAction = PSA_SWAP_WEATHER;
+        break;
     }
   }
 

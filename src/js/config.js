@@ -118,6 +118,10 @@ export default [
             label: 'Show seconds',
             value: '2',
           },
+          {
+            label: 'Swap weather (hourly/daily)',
+            value: '3',
+          },
         ],
         defaultValue: '0',
       },

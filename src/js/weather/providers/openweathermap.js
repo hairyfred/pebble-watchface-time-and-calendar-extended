@@ -1,3 +1,4 @@
+import dateFns from 'date-fns';
 import getGeoPosition from '../../lib/geoposition-cached';
 import { getTZOffestInSeconds, getLocalTimeStampFromUtc } from '../../lib/time';
 
@@ -79,16 +80,52 @@ const getForecastItems = (forecastType) => {
   }
 };
 
+// Aggregate the 5-day / 3-hour list into upcoming whole-day summaries. dateFns
+// formats UTC ms in the runtime's local timezone, so day boundaries and labels
+// are local. Bucket 0 is "today" (partial) and is skipped so each day is whole.
+const makeDailyForecast = (weather) => {
+  const buckets = {};
+  weather.list.forEach((item) => {
+    const ms = item.dt * 1000;
+    const key = dateFns.format(ms, 'YYYY-MM-DD');
+    if (!buckets[key]) {
+      buckets[key] = [];
+    }
+    buckets[key].push(item);
+  });
+
+  return Object.keys(buckets).sort().slice(1, 6).map((key) => {
+    const items = buckets[key];
+    const high = Math.round(Math.max.apply(null, items.map(it => it.main.temp)));
+    // representative condition: the entry closest to local 13:00
+    let rep = items[0];
+    let bestDist = 99;
+    items.forEach((it) => {
+      const dist = Math.abs(new Date(it.dt * 1000).getHours() - 13);
+      if (dist < bestDist) {
+        bestDist = dist;
+        rep = it;
+      }
+    });
+    return {
+      dayLabel: dateFns.format(rep.dt * 1000, 'ddd'),
+      temperature: high,
+      condition: rep.weather[0].id,
+      midTimeStamp: rep.dt * 1000,
+    };
+  });
+};
+
 const makeForecast = (weather, forecastType) => {
   const forecastItems = new Set(getForecastItems(forecastType));
-  const forecast = weather.list
+  const hourly = weather.list
     .filter((_, index) => forecastItems.has(index))
     .map(item => ({
       timeStamp: item.dt,
       temperature: Math.round(item.main.temp),
       condition: item.weather[0].id,
     }));
-  return forecast;
+  return { hourly, daily: makeDailyForecast(weather) };
 };
 
 export const makeWeatherObj = (options, weatherResponse) => {

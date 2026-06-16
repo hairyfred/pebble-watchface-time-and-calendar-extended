@@ -8,3 +8,4 @@ void window_update_time(struct tm *);
 void ready_for_weather(bool);
 void simple_weather_update(DictionaryIterator *iter, void *context);
 void time_window_force_redraw();
+void time_window_swap_weather();
