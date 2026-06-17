@@ -49,26 +49,34 @@ static void prv_populate_phone_battery_layer(Layer *me, GContext *ctx) {
   GRect b = layer_get_bounds(me);
   GColor fg = prv_foreground_color();
 
-  // Old-style telephone handset: two filled bulbs (earpiece + mouthpiece) at a
-  // diagonal, connected by a thick handle. Tilts from upper-left to lower-right
-  // so it reads as a phone, not a battery.
-  const int icon_top = (b.size.h - 16) / 2;
-  GPoint ear   = GPoint(2, icon_top + 3);
-  GPoint mouth = GPoint(8, icon_top + 13);
+  // Classic desk telephone silhouette: a horizontal handset (pill) on top, a
+  // rounded base body below. Unambiguously a phone, not a battery, not a body
+  // part.
   graphics_context_set_fill_color(ctx, fg);
-  graphics_fill_circle(ctx, ear, 3);
-  graphics_fill_circle(ctx, mouth, 3);
-  graphics_context_set_stroke_color(ctx, fg);
-  graphics_context_set_stroke_width(ctx, 3);
-  graphics_draw_line(ctx, ear, mouth);
-  graphics_context_set_stroke_width(ctx, 1);
+  const int icon_w = 13;
+  const int icon_h = 16;
+  const int icon_x = 0;
+  const int icon_y = (b.size.h - icon_h) / 2;
+  // Handset (pill on top): 13 wide, 4 tall, rounded.
+  graphics_fill_rect(ctx, GRect(icon_x, icon_y, icon_w, 4), 2, GCornersAll);
+  // Two short stubs connecting handset to base (the cradle prongs).
+  graphics_fill_rect(ctx, GRect(icon_x + 2, icon_y + 4, 2, 2), 0, GCornerNone);
+  graphics_fill_rect(ctx, GRect(icon_x + icon_w - 4, icon_y + 4, 2, 2), 0, GCornerNone);
+  // Base body: 13 wide, 8 tall, rounded corners.
+  graphics_fill_rect(ctx, GRect(icon_x, icon_y + 6, icon_w, 10), 2, GCornersAll);
+  // Keypad slot: punch a dark slot near the top of the base to break the
+  // silhouette so the base reads as a phone base, not a solid brick.
+  graphics_context_set_fill_color(ctx, GColorFromHEX(is_time_to_shift() ? settings_get_ShiftBackgroundColor() : settings_get_BackgroundColorHex()));
+  graphics_fill_rect(ctx, GRect(icon_x + 2, icon_y + 9, icon_w - 4, 1), 0, GCornerNone);
+  graphics_fill_rect(ctx, GRect(icon_x + 2, icon_y + 11, icon_w - 4, 1), 0, GCornerNone);
+  graphics_fill_rect(ctx, GRect(icon_x + 2, icon_y + 13, icon_w - 4, 1), 0, GCornerNone);
 
   static char txt[8];
   snprintf(txt, sizeof(txt), "%d%%", s_percent);
   // y=0 to align baseline with the watch battery % (same font / row).
   graphics_draw_text(ctx, txt, \
       fonts_get_system_font(FONT_KEY_GOTHIC_18), \
-      GRect(13, 0, b.size.w - 13, b.size.h), \
+      GRect(15, 0, b.size.w - 15, b.size.h), \
       GTextOverflowModeWordWrap, \
       GTextAlignmentLeft, \
       NULL);
