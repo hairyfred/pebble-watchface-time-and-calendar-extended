@@ -3,18 +3,13 @@
 #include "../settings.h"
 
 // A compact heart-rate + steps readout that sits on the date row, flanking the
-// centered date: HR on the left, steps (with the footsteps glyph) on the right.
-// Only created on wide screens (see time-window.c) where it won't overlap the
-// date.
+// centered date: "HR <bpm>" on the left, "STP <steps>" on the right. Only
+// created on wide screens (see time-window.c) where it won't overlap the date.
 static Layer *s_this_layer = NULL;
-static GFont s_statuses_font;
 static void prv_populate_health_strip_layer(Layer *, GContext *);
 
 void init_health_strip_layer(GRect rect) {
   s_this_layer = layer_create(rect);
-  // 14px statuses font so the footsteps glyph fits the thin date row without
-  // being bottom-clipped (the 18px one looked like a box).
-  s_statuses_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_STATUSES_14));
   layer_set_update_proc(s_this_layer, prv_populate_health_strip_layer);
 }
 
@@ -22,7 +17,6 @@ void deinit_health_strip_layer() {
   if (s_this_layer) {
     layer_destroy(s_this_layer);
     s_this_layer = NULL;
-    fonts_unload_custom_font(s_statuses_font);
   }
 }
 
@@ -48,7 +42,7 @@ static void prv_populate_health_strip_layer(Layer *me, GContext *ctx) {
       GRect(2, -3, b.size.w / 2 - 2, b.size.h + 4), \
       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 
-  // Steps (cumulative today), drawn as [footsteps glyph][number], right-aligned.
+  // Steps (cumulative today), drawn right-aligned with an "STP" prefix.
   time_t start = time_start_of_today();
   time_t end = time(NULL);
   int steps = 0;
@@ -56,20 +50,9 @@ static void prv_populate_health_strip_layer(Layer *me, GContext *ctx) {
     steps = (int)health_service_sum_today(HealthMetricStepCount);
   }
   static char steps_txt[16];
-  snprintf(steps_txt, sizeof(steps_txt), "%d", steps);
-
-  GSize num_size = graphics_text_layout_get_content_size(steps_txt, font, \
-      GRect(0, 0, b.size.w, b.size.h), GTextOverflowModeWordWrap, GTextAlignmentLeft);
-  const int icon_w = 14;
-  const int num_x = b.size.w - num_size.w - 1;
-  const int icon_x = num_x - icon_w;
-
-  // "G" is the footsteps glyph in the statuses font.
-  graphics_draw_text(ctx, "G", s_statuses_font, \
-      GRect(icon_x, 0, icon_w, b.size.h), \
-      GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  snprintf(steps_txt, sizeof(steps_txt), "STP %d", steps);
   graphics_draw_text(ctx, steps_txt, font, \
-      GRect(num_x, -3, num_size.w + 2, b.size.h + 4), \
-      GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+      GRect(b.size.w / 2, -3, b.size.w / 2 - 2, b.size.h + 4), \
+      GTextOverflowModeTrailingEllipsis, GTextAlignmentRight, NULL);
 #endif
 }

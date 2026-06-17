@@ -172,11 +172,6 @@
           "file": "fonts/statuses.ttf"
         },
         {
-          "type": "font",
-          "name": "STATUSES_14",
-          "file": "fonts/statuses.ttf"
-        },
-        {
           "type": "raw",
           "name": "LOCALE_ENGLISH",
           "file": "locale/locale_en.bin"
