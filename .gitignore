@@ -7,5 +7,7 @@ pebble-screenshot*.*
 Thumbs.db
 .vscode
 .env
-src/pkjs/**
+# src/pkjs/** is the babel-transpiled output of src/js (committed so Pebble
+# Cloud's webpack 1 can bundle it without running babel itself). Regenerate
+# with `npm run build` after editing src/js.
 
