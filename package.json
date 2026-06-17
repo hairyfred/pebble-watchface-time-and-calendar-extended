@@ -27,9 +27,6 @@
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
-      "aplite",
-      "basalt",
-      "diorite",
       "emery"
     ],
     "capabilities": [
@@ -172,6 +169,11 @@
         {
           "type": "font",
           "name": "STATUSES_18",
+          "file": "fonts/statuses.ttf"
+        },
+        {
+          "type": "font",
+          "name": "STATUSES_14",
           "file": "fonts/statuses.ttf"
         },
         {
