@@ -94,30 +94,32 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
     #if defined (DEBUG)
       APP_LOG(APP_LOG_LEVEL_DEBUG, "weather status %d, BAD status:%s", settings_get_WeatherStatus(), weather_err_symbol);
     #endif
+    // Shifted to x=64 so the phone battery % can sit at x=22..62 next to the BT
+    // glyph; sub-indicators now line up after the phone battery.
     graphics_draw_text(ctx, weather_err_symbol , \
     statuses_font, \
-    GRect (20, 0, 20, 20), \
+    GRect (64, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
   }
-  
+
   if (is_quiet_time()) {
     graphics_draw_text(ctx, "D" , \
     statuses_font, \
-    GRect (40, 0, 20, 20), \
+    GRect (84, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
-    NULL);    
+    NULL);
   }
   //if (settings_get_ClockFormatSettings() == CF_RESPECT)
-  if (strcmp(settings_get_ClockFormat(), "%I:%M") == 0) {    
+  if (strcmp(settings_get_ClockFormat(), "%I:%M") == 0) {
     graphics_draw_text(ctx, get_Time()->tm_hour < 12 ? "AM" : "PM" , \
     fonts_get_system_font(FONT_KEY_GOTHIC_18), \
-    GRect (60, 0, 20, 20), \
+    GRect (104, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
-    NULL);    
+    NULL);
   }
 }
 
