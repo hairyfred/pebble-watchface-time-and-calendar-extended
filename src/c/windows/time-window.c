@@ -11,6 +11,7 @@
 #include "../modules/include/phone_battery_m.h"
 #include "../modules/include/weather_extras_m.h"
 #include "../modules/include/health_strip_m.h"
+#include "../modules/include/ip_m.h"
 #include "../settings.h"
 
 static Window *s_time_window;
@@ -56,6 +57,13 @@ static void prv_window_load(Window *window) {
   const bool top_has_room = (watch_battery_x - pb_x) >= 40;
   const GRect phone_battery_bounds = GRect(pb_x, 0, pb_w, 20);
 
+  // Public IP sits in the top middle, between the BT cluster on the left and
+  // the watch battery on the right. The bluetooth sub-indicators (weather
+  // error / quiet time / AM-PM) are drawn ON TOP of this layer when active,
+  // since IP is added as a child before the bluetooth layer.
+  const int ip_top_x = 64;
+  const GRect ip_top_bounds = GRect(ip_top_x, 0, watch_battery_x - ip_top_x - 2, 20);
+
   // Bottom band (tall screens only): a compact weather-extras line above a
   // forecast timeline. Derived from the window height, so it appears on emery /
   // Pebble Time 2 and is absent on the 144x168 platforms with no room below the
@@ -79,6 +87,7 @@ static void prv_window_load(Window *window) {
   init_weather_layer(weather_bounds);
   if (top_has_room) {
     init_phone_battery_layer(phone_battery_bounds);
+    init_ip_layer(ip_top_bounds);
   }
   if (bottom_has_room) {
     init_weather_extras_layer(weather_extras_bounds);
@@ -96,6 +105,11 @@ static void prv_window_load(Window *window) {
       init_health_strip_layer(date_bounds);
       layer_add_child(window_layer, get_layer_health_strip());
     }
+  }
+  // IP first so the bluetooth layer's sub-indicators (weather error / quiet
+  // time / AM-PM) draw over it when active rather than being hidden behind it.
+  if (get_layer_ip()) {
+    layer_add_child(window_layer, get_layer_ip());
   }
   layer_add_child(window_layer, get_layer_bluetooth());
   layer_add_child(window_layer, get_layer_battery());
@@ -128,6 +142,7 @@ static void prv_window_unload(Window *window) {
   deinit_phone_battery_layer();
   deinit_weather_extras_layer();
   deinit_health_strip_layer();
+  deinit_ip_layer();
 }
 
 void init_time_window() {
@@ -192,5 +207,8 @@ void time_window_force_redraw() {
   }
   if (get_layer_health_strip()) {
     layer_mark_dirty(get_layer_health_strip());
+  }
+  if (get_layer_ip()) {
+    layer_mark_dirty(get_layer_ip());
   }
 }

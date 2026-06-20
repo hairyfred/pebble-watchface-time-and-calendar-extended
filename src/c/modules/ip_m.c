@@ -2,9 +2,10 @@
 #include "include/ip_m.h"
 #include "../settings.h"
 
-// Bottom-band panel for the phone's public IP and its ISP, both fetched in one
-// PebbleKit JS call (ipwho.is) and relayed via AppMessage. Persisted so they
-// show immediately on launch; refreshed when JS responds.
+// Top-row display of the phone's public IP (compact, GOTHIC_14, centered),
+// fetched in PebbleKit JS via ipwho.is/ipapi.co/ipify and relayed via
+// AppMessage. The ISP is still received (and persisted) for possible future
+// use but is not displayed in the current layout.
 typedef struct {
   char ip[46];  // large enough for an IPv6 string; normally holds IPv4
   char isp[64];
@@ -63,15 +64,10 @@ static void prv_populate_ip_layer(Layer *me, GContext *ctx) {
   }
   GRect b = layer_get_bounds(me);
 
-  // IP is the headline (GOTHIC_18); ISP is secondary, lighter (GOTHIC_14).
+  // Compact IP for the top row: GOTHIC_14, centered, single line.
   if (strlen(s_data.ip) > 0) {
-    graphics_draw_text(ctx, s_data.ip, fonts_get_system_font(FONT_KEY_GOTHIC_18), \
-        GRect(0, -3, b.size.w, 22), \
-        GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
-  }
-  if (strlen(s_data.isp) > 0) {
-    graphics_draw_text(ctx, s_data.isp, fonts_get_system_font(FONT_KEY_GOTHIC_14), \
-        GRect(0, 19, b.size.w, 18), \
+    graphics_draw_text(ctx, s_data.ip, fonts_get_system_font(FONT_KEY_GOTHIC_14), \
+        GRect(0, 1, b.size.w, b.size.h), \
         GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
   }
 }
