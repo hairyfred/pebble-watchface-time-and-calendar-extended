@@ -81,9 +81,11 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   #endif  
   init = true; //do not vibrate on watchface startup.
   settings_get_theme(ctx);
+  // BT glyph sits at x=42 so the phone battery % can take the far-left slot
+  // (x=2..40); sub-indicators follow at x=64+ (see below).
   graphics_draw_text(ctx, bt_connected ? "B" : "A" , \
     statuses_font, \
-    GRect (0, 0, 20, 20), \
+    GRect (42, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
