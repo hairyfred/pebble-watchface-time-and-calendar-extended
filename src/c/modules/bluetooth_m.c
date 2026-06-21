@@ -81,11 +81,12 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   #endif  
   init = true; //do not vibrate on watchface startup.
   settings_get_theme(ctx);
-  // BT glyph sits at x=42 so the phone battery % can take the far-left slot
-  // (x=2..40); sub-indicators follow at x=64+ (see below).
+  // BT glyph at x=28, right after the phone battery % text (x=0..~26) so both
+  // sit flush in the top-left corner with no stray gap; sub-indicators follow
+  // at x=50+ (see below).
   graphics_draw_text(ctx, bt_connected ? "B" : "A" , \
     statuses_font, \
-    GRect (42, 0, 20, 20), \
+    GRect (28, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
@@ -96,11 +97,11 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
     #if defined (DEBUG)
       APP_LOG(APP_LOG_LEVEL_DEBUG, "weather status %d, BAD status:%s", settings_get_WeatherStatus(), weather_err_symbol);
     #endif
-    // Shifted to x=64 so the phone battery % can sit at x=22..62 next to the BT
-    // glyph; sub-indicators now line up after the phone battery.
+    // Sub-indicators sit after the BT glyph: weather error at x=50, quiet time
+    // at x=70, AM/PM at x=90.
     graphics_draw_text(ctx, weather_err_symbol , \
     statuses_font, \
-    GRect (64, 0, 20, 20), \
+    GRect (50, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
@@ -109,7 +110,7 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   if (is_quiet_time()) {
     graphics_draw_text(ctx, "D" , \
     statuses_font, \
-    GRect (84, 0, 20, 20), \
+    GRect (70, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
@@ -118,7 +119,7 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   if (strcmp(settings_get_ClockFormat(), "%I:%M") == 0) {
     graphics_draw_text(ctx, get_Time()->tm_hour < 12 ? "AM" : "PM" , \
     fonts_get_system_font(FONT_KEY_GOTHIC_18), \
-    GRect (104, 0, 20, 20), \
+    GRect (90, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);

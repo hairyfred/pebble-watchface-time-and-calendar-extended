@@ -48,14 +48,14 @@ static void prv_populate_phone_battery_layer(Layer *me, GContext *ctx) {
 
   static char txt[8];
   snprintf(txt, sizeof(txt), "%d%%", s_percent);
-  // Right-aligned within its 38px slot so the text sits flush against the BT
-  // glyph just to its right (mirrors the watch battery % on the other side,
-  // which is also right-aligned next to the battery icon). y=0 keeps the
-  // baseline matched with the watch battery on the opposite side.
+  // Left-aligned so the percentage sits flush at the left screen edge with no
+  // blank gap before it. The BT glyph and its sub-indicators are positioned to
+  // sit just to the right of this text (see bluetooth_m.c). y=0 keeps the
+  // baseline matched with the watch battery % on the opposite side.
   graphics_draw_text(ctx, txt, \
       fonts_get_system_font(FONT_KEY_GOTHIC_18), \
       GRect(0, 0, b.size.w, b.size.h), \
       GTextOverflowModeWordWrap, \
-      GTextAlignmentRight, \
+      GTextAlignmentLeft, \
       NULL);
 }

@@ -38,12 +38,12 @@ static void prv_window_load(Window *window) {
   #endif  
   Layer *window_layer = window_get_root_layer(window);
   const GRect bounds = layer_get_bounds(window_layer);
-  // Top row, left to right: phone battery % (2..40), bluetooth glyph (42..62),
-  // bluetooth sub-indicators (weather error / quiet time / AM-PM, 64..124),
-  // then the watch battery % + icon flush right. Phone battery sits to the LEFT
-  // of the BT glyph (text first, then icon) so the order on the left visually
-  // matches the watch battery on the right (text then icon). BT glyph and its
-  // sub-indicators are repositioned inside the bluetooth layer (see bluetooth_m.c).
+  // Top row, left to right: phone battery % (0..28, flush to the left edge),
+  // bluetooth glyph (28..48), bluetooth sub-indicators (weather error / quiet
+  // time / AM-PM, 50..110), public IP centered in the middle, then the watch
+  // battery % + icon flush right. Phone battery % sits to the LEFT of the BT
+  // glyph; both flush in the top-left corner. BT glyph and its sub-indicators
+  // are repositioned inside the bluetooth layer (see bluetooth_m.c).
   const GRect bluetooth_bounds = GRect (0, 0, 130, 20);
   const GRect battery_bounds = GRect (bounds.size.w - 47, 0, 52, 20);
   const GRect date_bounds = GRect(0, 22, bounds.size.w, 14);
@@ -51,8 +51,8 @@ static void prv_window_load(Window *window) {
   const GRect calendar_bounds = GRect (2, 92, bounds.size.w, 73);
   GRect weather_bounds = GRect (2, 34, bounds.size.w, 58);
 
-  const int pb_x = 2;
-  const int pb_w = 38;
+  const int pb_x = 0;
+  const int pb_w = 40;
   const int watch_battery_x = bounds.size.w - 47;
   const bool top_has_room = (watch_battery_x - pb_x) >= 40;
   const GRect phone_battery_bounds = GRect(pb_x, 0, pb_w, 20);
