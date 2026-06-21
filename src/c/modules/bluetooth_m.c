@@ -88,11 +88,14 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   // and the glyph sits at the far-left. Sub-indicators follow relative to it.
   const int pbw = phone_battery_width();
   const int bt_x = pbw > 0 ? pbw + 2 : 0;
-  // y=-2 matches the watch battery icon's vertical position (battery_m.c) so
-  // the BT logo lines up level with it across the top row.
+  // The bluetooth "B" glyph inks ~3px higher in the statuses font than the
+  // battery digit glyphs do, so to line up level with the watch battery icon
+  // (drawn at y=-2) the BT glyph must be drawn ~4px lower, at y=+2. (Measured
+  // from statuses.ttf: at the same draw y, "B" inks top=-3 vs the battery
+  // digit's top=+1.)
   graphics_draw_text(ctx, bt_connected ? "B" : "A" , \
     statuses_font, \
-    GRect (bt_x, -2, 20, 20), \
+    GRect (bt_x, 2, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentLeft, \
     NULL);
@@ -104,10 +107,11 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
       APP_LOG(APP_LOG_LEVEL_DEBUG, "weather status %d, BAD status:%s", settings_get_WeatherStatus(), weather_err_symbol);
     #endif
     // Sub-indicators sit after the BT glyph (which is ~16px wide): weather
-    // error, then quiet time, then AM/PM, each 20px apart.
+    // error, then quiet time, then AM/PM, each 20px apart. y=+1 keeps these
+    // icon glyphs level with the battery icon (same reasoning as the BT glyph).
     graphics_draw_text(ctx, weather_err_symbol , \
     statuses_font, \
-    GRect (bt_x + 18, -2, 20, 20), \
+    GRect (bt_x + 18, 1, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
@@ -116,7 +120,7 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   if (is_quiet_time()) {
     graphics_draw_text(ctx, "D" , \
     statuses_font, \
-    GRect (bt_x + 38, -2, 20, 20), \
+    GRect (bt_x + 38, 1, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
