@@ -38,12 +38,13 @@ static void prv_window_load(Window *window) {
   #endif  
   Layer *window_layer = window_get_root_layer(window);
   const GRect bounds = layer_get_bounds(window_layer);
-  // Top row, left to right: phone battery % (0..28, flush to the left edge),
-  // bluetooth glyph (28..48), bluetooth sub-indicators (weather error / quiet
-  // time / AM-PM, 50..110), public IP centered in the middle, then the watch
-  // battery % + icon flush right. Phone battery % sits to the LEFT of the BT
-  // glyph; both flush in the top-left corner. BT glyph and its sub-indicators
-  // are repositioned inside the bluetooth layer (see bluetooth_m.c).
+  // Top row, left to right: phone battery % (0..~34, flush to the left edge),
+  // a small gap, the bluetooth glyph (box at x=36), bluetooth sub-indicators
+  // (weather error / quiet time / AM-PM at 58/78/98), the public IP centered
+  // dead-centre, then the watch battery % + icon flush right. Phone battery %
+  // sits to the LEFT of the BT glyph; both flush in the top-left corner. BT
+  // glyph and its sub-indicators are repositioned inside the bluetooth layer
+  // (see bluetooth_m.c).
   const GRect bluetooth_bounds = GRect (0, 0, 130, 20);
   const GRect battery_bounds = GRect (bounds.size.w - 47, 0, 52, 20);
   const GRect date_bounds = GRect(0, 22, bounds.size.w, 14);
@@ -57,12 +58,13 @@ static void prv_window_load(Window *window) {
   const bool top_has_room = (watch_battery_x - pb_x) >= 40;
   const GRect phone_battery_bounds = GRect(pb_x, 0, pb_w, 20);
 
-  // Public IP sits in the top middle, between the BT cluster on the left and
-  // the watch battery on the right. The bluetooth sub-indicators (weather
-  // error / quiet time / AM-PM) are drawn ON TOP of this layer when active,
-  // since IP is added as a child before the bluetooth layer.
-  const int ip_top_x = 64;
-  const GRect ip_top_bounds = GRect(ip_top_x, 0, watch_battery_x - ip_top_x - 2, 20);
+  // Public IP centered dead-centre on the screen: a full-width layer with the
+  // text centered, so its midpoint is the screen midpoint (x = w/2). Its
+  // ~70px-wide text sits clear of the BT cluster on the left and the watch
+  // battery on the right in the common case. The bluetooth sub-indicators
+  // (weather error / quiet time / AM-PM) draw ON TOP when active, since IP is
+  // added as a child before the bluetooth layer.
+  const GRect ip_top_bounds = GRect(0, 0, bounds.size.w, 20);
 
   // Bottom band (tall screens only): a compact weather-extras line above a
   // forecast timeline. Derived from the window height, so it appears on emery /
