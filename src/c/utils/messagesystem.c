@@ -79,6 +79,11 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *phone_battery = dict_find(iter, MESSAGE_KEY_PhoneBattery);
   if (phone_battery) {
     phone_battery_set(phone_battery->value->int32);
+    // The BT glyph is positioned relative to the phone battery %% width, so
+    // redraw the bluetooth layer too when the %% (and thus its width) changes.
+    if (get_layer_bluetooth()) {
+      layer_mark_dirty(get_layer_bluetooth());
+    }
   }
 }
 

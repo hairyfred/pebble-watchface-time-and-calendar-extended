@@ -36,6 +36,18 @@ void phone_battery_set(int percent) {
   }
 }
 
+int phone_battery_width() {
+  if (s_percent < 0 || !settings_get_ShowPhoneBattery()) {
+    return 0;
+  }
+  char txt[8];
+  snprintf(txt, sizeof(txt), "%d%%", s_percent);
+  GSize sz = graphics_text_layout_get_content_size(txt, \
+      fonts_get_system_font(FONT_KEY_GOTHIC_18), \
+      GRect(0, 0, 60, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft);
+  return sz.w;
+}
+
 static void prv_populate_phone_battery_layer(Layer *me, GContext *ctx) {
   settings_get_theme(ctx);
   if (!settings_get_ShowPhoneBattery()) {

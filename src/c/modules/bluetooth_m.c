@@ -4,6 +4,7 @@
 #include "../utils/include/timeutils.h"
 #include "../utils/include/vibe.h"
 #include "../utils/include/ticktimerhelper.h"
+#include "include/phone_battery_m.h"
 
 //static GBitmap *s_bt_icon;
 static GFont statuses_font;
@@ -81,14 +82,17 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   #endif  
   init = true; //do not vibrate on watchface startup.
   settings_get_theme(ctx);
-  // BT glyph box at x=36 -- just after the phone battery % text (a 2-3 digit
-  // "NN%" / "100%" is ~34px wide) with a small clean gap, no overlap;
-  // sub-indicators follow at x=58+ (see below).
+  // Place the BT glyph snug right after the phone battery % text (whose width
+  // varies with the digits), so it sits as close to the % as the watch battery
+  // % sits to its battery icon. When no phone battery is shown the width is 0
+  // and the glyph sits at the far-left. Sub-indicators follow relative to it.
+  const int pbw = phone_battery_width();
+  const int bt_x = pbw > 0 ? pbw + 2 : 0;
   graphics_draw_text(ctx, bt_connected ? "B" : "A" , \
     statuses_font, \
-    GRect (36, 0, 20, 20), \
+    GRect (bt_x, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
-    GTextAlignmentCenter, \
+    GTextAlignmentLeft, \
     NULL);
 
   if (settings_get_WeatherStatus() != WEATHER_OK) {
@@ -97,11 +101,11 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
     #if defined (DEBUG)
       APP_LOG(APP_LOG_LEVEL_DEBUG, "weather status %d, BAD status:%s", settings_get_WeatherStatus(), weather_err_symbol);
     #endif
-    // Sub-indicators sit after the BT glyph: weather error at x=58, quiet time
-    // at x=78, AM/PM at x=98.
+    // Sub-indicators sit after the BT glyph (which is ~16px wide): weather
+    // error, then quiet time, then AM/PM, each 20px apart.
     graphics_draw_text(ctx, weather_err_symbol , \
     statuses_font, \
-    GRect (58, 0, 20, 20), \
+    GRect (bt_x + 18, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
@@ -110,7 +114,7 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   if (is_quiet_time()) {
     graphics_draw_text(ctx, "D" , \
     statuses_font, \
-    GRect (78, 0, 20, 20), \
+    GRect (bt_x + 38, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
@@ -119,7 +123,7 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   if (strcmp(settings_get_ClockFormat(), "%I:%M") == 0) {
     graphics_draw_text(ctx, get_Time()->tm_hour < 12 ? "AM" : "PM" , \
     fonts_get_system_font(FONT_KEY_GOTHIC_18), \
-    GRect (98, 0, 20, 20), \
+    GRect (bt_x + 58, 0, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);

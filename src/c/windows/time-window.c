@@ -38,13 +38,11 @@ static void prv_window_load(Window *window) {
   #endif  
   Layer *window_layer = window_get_root_layer(window);
   const GRect bounds = layer_get_bounds(window_layer);
-  // Top row, left to right: phone battery % (0..~34, flush to the left edge),
-  // a small gap, the bluetooth glyph (box at x=36), bluetooth sub-indicators
-  // (weather error / quiet time / AM-PM at 58/78/98), the public IP centered
-  // dead-centre, then the watch battery % + icon flush right. Phone battery %
-  // sits to the LEFT of the BT glyph; both flush in the top-left corner. BT
-  // glyph and its sub-indicators are repositioned inside the bluetooth layer
-  // (see bluetooth_m.c).
+  // Top row, left to right: phone battery % flush to the left edge, the
+  // bluetooth glyph placed snug right after it (positioned dynamically from the
+  // measured % width in bluetooth_m.c), the bluetooth sub-indicators (weather
+  // error / quiet time / AM-PM), the public IP centered dead-centre, then the
+  // watch battery % + icon flush right.
   const GRect bluetooth_bounds = GRect (0, 0, 130, 20);
   const GRect battery_bounds = GRect (bounds.size.w - 47, 0, 52, 20);
   const GRect date_bounds = GRect(0, 22, bounds.size.w, 14);
