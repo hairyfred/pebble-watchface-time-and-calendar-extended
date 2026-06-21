@@ -88,9 +88,11 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   // and the glyph sits at the far-left. Sub-indicators follow relative to it.
   const int pbw = phone_battery_width();
   const int bt_x = pbw > 0 ? pbw + 2 : 0;
+  // y=-2 matches the watch battery icon's vertical position (battery_m.c) so
+  // the BT logo lines up level with it across the top row.
   graphics_draw_text(ctx, bt_connected ? "B" : "A" , \
     statuses_font, \
-    GRect (bt_x, 0, 20, 20), \
+    GRect (bt_x, -2, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentLeft, \
     NULL);
@@ -105,7 +107,7 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
     // error, then quiet time, then AM/PM, each 20px apart.
     graphics_draw_text(ctx, weather_err_symbol , \
     statuses_font, \
-    GRect (bt_x + 18, 0, 20, 20), \
+    GRect (bt_x + 18, -2, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
@@ -114,7 +116,7 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
   if (is_quiet_time()) {
     graphics_draw_text(ctx, "D" , \
     statuses_font, \
-    GRect (bt_x + 38, 0, 20, 20), \
+    GRect (bt_x + 38, -2, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
