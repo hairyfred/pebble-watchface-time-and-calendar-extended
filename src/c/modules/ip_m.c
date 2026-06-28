@@ -66,7 +66,12 @@ static void prv_populate_ip_layer(Layer *me, GContext *ctx) {
 
   // Compact IP for the top row: GOTHIC_14, centered, single line.
   if (strlen(s_data.ip) > 0) {
-    graphics_draw_text(ctx, s_data.ip, fonts_get_system_font(FONT_KEY_GOTHIC_14), \
+    // The JS side already sends only an IPv4 address or the short marker
+    // "IPv6", but a value persisted by an older build could be a full ~39-char
+    // IPv6 string that overflows the row and overlaps the other status glyphs.
+    // A colon means IPv6, so collapse any such address to the marker here too.
+    const char *ip_disp = strchr(s_data.ip, ':') ? "IPv6" : s_data.ip;
+    graphics_draw_text(ctx, ip_disp, fonts_get_system_font(FONT_KEY_GOTHIC_14), \
         GRect(0, 1, b.size.w, b.size.h), \
         GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
   }

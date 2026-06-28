@@ -66,6 +66,13 @@ var parse = function parse(text) {
   } catch (e) {
     return null;
   }
+}; // An IPv6 string (e.g. "2001:db8::1") is up to 39 chars and overflows the top
+// row, overlapping the other status glyphs, so we only ever display IPv4. A
+// colon means IPv6; a non-empty colon-free string is IPv4.
+
+
+var isV4 = function isV4(ip) {
+  return typeof ip === 'string' && ip.length > 0 && ip.indexOf(':') === -1;
 };
 
 var _default =
@@ -73,7 +80,7 @@ var _default =
 (0, _asyncToGenerator2.default)(
 /*#__PURE__*/
 _regenerator.default.mark(function _callee() {
-  var a, b, c;
+  var a, isp, c, b;
   return _regenerator.default.wrap(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
@@ -85,75 +92,76 @@ _regenerator.default.mark(function _callee() {
         case 3:
           _context.t1 = _context.sent;
           a = (0, _context.t0)(_context.t1);
+          isp = a && a.success && a.connection && a.connection.isp ? a.connection.isp : '';
 
-          if (!(a && a.success && a.ip && a.connection && a.connection.isp)) {
-            _context.next = 8;
+          if (!(a && a.success && isV4(a.ip))) {
+            _context.next = 9;
             break;
           }
 
-          console.log("phone ip via ipwho.is: ".concat(a.ip, " / ").concat(a.connection.isp));
+          console.log("phone ipv4 via ipwho.is: ".concat(a.ip, " / ").concat(isp || '(no isp)'));
           return _context.abrupt("return", {
             ip: a.ip,
-            isp: a.connection.isp
+            isp: isp
           });
 
-        case 8:
+        case 9:
           _context.t2 = parse;
-          _context.next = 11;
-          return fetchJSON('https://ipapi.co/json/', 8000);
-
-        case 11:
-          _context.t3 = _context.sent;
-          b = (0, _context.t2)(_context.t3);
-
-          if (!(b && b.ip)) {
-            _context.next = 16;
-            break;
-          }
-
-          console.log("phone ip via ipapi.co: ".concat(b.ip, " / ").concat(b.org || '(no isp)'));
-          return _context.abrupt("return", {
-            ip: b.ip,
-            isp: b.org || ''
-          });
-
-        case 16:
-          _context.t4 = parse;
-          _context.next = 19;
+          _context.next = 12;
           return fetchJSON('https://api.ipify.org?format=json', 8000);
 
-        case 19:
-          _context.t5 = _context.sent;
-          c = (0, _context.t4)(_context.t5);
+        case 12:
+          _context.t3 = _context.sent;
+          c = (0, _context.t2)(_context.t3);
 
-          if (!(c && c.ip)) {
-            _context.next = 24;
+          if (!(c && isV4(c.ip))) {
+            _context.next = 17;
             break;
           }
 
-          console.log("phone ip via ipify (no isp): ".concat(c.ip));
+          console.log("phone ipv4 via ipify: ".concat(c.ip, " / ").concat(isp || '(no isp)'));
           return _context.abrupt("return", {
             ip: c.ip,
-            isp: ''
+            isp: isp
           });
 
-        case 24:
-          if (!(a && a.success && a.ip)) {
-            _context.next = 27;
+        case 17:
+          _context.t4 = parse;
+          _context.next = 20;
+          return fetchJSON('https://ipapi.co/json/', 8000);
+
+        case 20:
+          _context.t5 = _context.sent;
+          b = (0, _context.t4)(_context.t5);
+
+          if (!(b && isV4(b.ip))) {
+            _context.next = 25;
             break;
           }
 
-          console.log("phone ip via ipwho.is (no isp): ".concat(a.ip));
+          console.log("phone ipv4 via ipapi.co: ".concat(b.ip));
           return _context.abrupt("return", {
-            ip: a.ip,
-            isp: ''
+            ip: b.ip,
+            isp: isp || b.org || ''
           });
 
-        case 27:
+        case 25:
+          if (!(a && a.ip || c && c.ip || b && b.ip)) {
+            _context.next = 28;
+            break;
+          }
+
+          console.log('phone ip: IPv6-only, showing "IPv6" marker');
+          return _context.abrupt("return", {
+            ip: 'IPv6',
+            isp: isp
+          });
+
+        case 28:
           console.log('phone ip: all providers failed');
           return _context.abrupt("return", null);
 
-        case 29:
+        case 30:
         case "end":
           return _context.stop();
       }

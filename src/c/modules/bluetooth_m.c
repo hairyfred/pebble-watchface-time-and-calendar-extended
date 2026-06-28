@@ -100,36 +100,43 @@ static void prv_populate_bt_layer(Layer *me, GContext *ctx) {
     GTextAlignmentLeft, \
     NULL);
 
+  // Sub-indicators are PACKED left-to-right from a cursor that starts right
+  // after the BT glyph (~16px wide) and only advances when an indicator is
+  // actually drawn. This keeps the quiet-time (snooze) glyph snug against the
+  // bluetooth icon instead of floating ~40px out into the centered IP when the
+  // weather-error slot is empty. y=+1 keeps these icon glyphs level with the
+  // battery icon (same reasoning as the BT glyph).
+  int sx = bt_x + 18;
+
   if (settings_get_WeatherStatus() != WEATHER_OK) {
     char weather_err_symbol[2] = {"B"};
     prv_get_weather_error_symbol(weather_err_symbol);
     #if defined (DEBUG)
       APP_LOG(APP_LOG_LEVEL_DEBUG, "weather status %d, BAD status:%s", settings_get_WeatherStatus(), weather_err_symbol);
     #endif
-    // Sub-indicators sit after the BT glyph (which is ~16px wide): weather
-    // error, then quiet time, then AM/PM, each 20px apart. y=+1 keeps these
-    // icon glyphs level with the battery icon (same reasoning as the BT glyph).
     graphics_draw_text(ctx, weather_err_symbol , \
     statuses_font, \
-    GRect (bt_x + 18, 1, 20, 20), \
+    GRect (sx, 1, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
+    sx += 20;
   }
 
   if (is_quiet_time()) {
     graphics_draw_text(ctx, "D" , \
     statuses_font, \
-    GRect (bt_x + 38, 1, 20, 20), \
+    GRect (sx, 1, 20, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
+    sx += 20;
   }
   //if (settings_get_ClockFormatSettings() == CF_RESPECT)
   if (strcmp(settings_get_ClockFormat(), "%I:%M") == 0) {
     graphics_draw_text(ctx, get_Time()->tm_hour < 12 ? "AM" : "PM" , \
     fonts_get_system_font(FONT_KEY_GOTHIC_18), \
-    GRect (bt_x + 58, 0, 20, 20), \
+    GRect (sx, 0, 24, 20), \
     GTextOverflowModeWordWrap, \
     GTextAlignmentCenter, \
     NULL);
